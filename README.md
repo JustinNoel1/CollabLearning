@@ -7,3 +7,13 @@ A written summary of this project is located in the `report.pdf` file, including
 * Even a very small amount of collaboration can improve both the individual models and the entire ensemble.
 
 The details of our build environment are contained in the `requirements.txt` file or, for those using conda, are in the `environment.yaml` file. Probably the most important requirements are Python 3.6 and Tensorflow 1.1.
+
+To train the models:
+1. Execute 
+`python my_capstone.py`
+ from the source directory. This will download the datasets as necessary and train all of the models according to the hardcoded hyperparameters in `my_capstone.py`.
+1. Take a vacation. (If you are using a CPU, make it a long vacation).
+
+Statistical data, graphs, and checkpoints will be dumped into the `collab_logs` directory. These can be combined into more meaningful graphs by running:
+`python analysis.py`
+The output will be pushed into the `latex/images` directory. 

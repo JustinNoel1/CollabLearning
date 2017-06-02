@@ -13,7 +13,7 @@ def build_dataframe(dataset):
     """
     import os
     #directory for pickles
-    pickle_pantry = os.path.join('AWS_collab_logs',dataset,'collab')
+    pickle_pantry = os.path.join('collab_logs',dataset,'collab')
 
     #build column headers
     models = ['ST', 'M', 'Ens']
