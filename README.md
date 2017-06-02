@@ -1,5 +1,5 @@
 # CollabLearning
-In this project, we introduce several techniques for training collaborative ensembles of deep neural networks. In addition to learning to solve an image classification problem, these collaborative ensembles also learn to reach a consensus on their predictions. As a consequence each of the models in these ensembles learns to mimic a traditional ensemble, with corresponding improvements to performance.
+In this project, we introduce several techniques for training collaborative ensembles of deep neural networks. In addition to learning to solve an image classification problem, these collaborative ensembles also learn to reach a consensus on their predictions. As a consequence, each of the models in these ensembles learns to mimic a traditional ensemble, with corresponding improvements to performance.
 
 A written summary of this project is located in the `report.pdf` file, including a detailed analysis of the performance of these models. The upshot of this summary is that neural networks can be trained in collaborative ensembles where they learn to reach a consensus on their functions. We observe:
 * The individual models in these collaborative ensembles (for most reasonable choices of hyperparameters) obtain better performance on new data then their traditionally trained counterparts. 
