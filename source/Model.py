@@ -377,6 +377,7 @@ class EnsembleModel(Model):
 		for feed_dict[self.x], feed_dict[self.y] in self.batch.train_batches(self.batch_size, 
 			shuffle = self.shuffle, distort = self.distort):
 			_,  *stats = sess.run([self.optimizer, *self.cost, *self.error, self.ens_cross_ent, self.ens_error], feed_dict = feed_dict)
+			stats = np.array(stats)
 			#previous way of measuring stats
 			# stats = 0.05*np.array(stats)
 			# cost = 0.95*cost + stats[0:self.ensemble_size]
