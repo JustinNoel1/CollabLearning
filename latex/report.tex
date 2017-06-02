@@ -51,7 +51,7 @@ textsize=small]
 
 \usepackage[bb=ams, cal=euler, scr=rsfso]{mathalfa}
 
-\crefname{axiom}{Axiom}{Axioms}
+\crefname{obs}{Observation}{Observations}
 
 %Better tables
 \usepackage{tabu}
@@ -203,6 +203,7 @@ textsize=small]
 \setcounter{tocdepth}{2}
 
 \newtheorem{cons}[thm]{Construction}
+\newtheorem{obs}[thm]{Observation}
 \begin{document}
 	\title{A collaborative approach to deep learning}
 
@@ -250,22 +251,22 @@ Below we will measure the generalization error in the usual fashion, via a test 
 
 More specifically, we will train two variations on the ResNet architecture \cite{ResNet}. Although we will leave the specifics of the implementation details to \cite{ResNet}, we will mention a few key properties. The general ResNet architecture can be easily scaled to varying depths by adjusting two parameters, the number of `bricks' $B$ and the number of repetitions $R$. With the exception of the last brick, each brick ends in a halving of each spatial dimension and a doubling of the number of filters. We adjust the width of the network by setting the number of filters $F$ for the first convolutional layer. All models are `fully convolutional' in the sense that they do not have any hidden fully connected layers. The resulting model will have $1+(B-1)(2R+2)+2R+1$ convolutional layers and end with a global average pooling operation and a linear map $\mathbb{R}^{2^B F} \to \mathbb{R}^{10}$ which is then composed with a softmax transformation. 
 
-The first model will be a 'shallow and thin' model (ST) with $B=3, R=1$ and $F=8$, yielding a 10 layer model whose penultimate layer has dimension $2^{6}=64$.  This model has approximately 50k learnable parameters. The second model will be a `medium' (M) model with $B=3, R=2$, and $F=16$, yielding a 16 layer model whose penultimate layer has dimension $2^{7}=128$. This model has approximately 280k learnable parameters.  
+The first model will be a `shallow and thin' model (ST) with $B=3, R=1$ and $F=8$, yielding a 10 layer model whose penultimate layer has dimension $2^{6}=64$.  This model has approximately 50k learnable parameters. The second model will be a `medium' (M) model with $B=3, R=2$, and $F=16$, yielding a 16 layer model whose penultimate layer has dimension $2^{7}=128$. This model has approximately 280k learnable parameters.  
 
-Traditionally one might train these models simultaneously to form an ensemble and average their predictions in a suitable fashion. We can train both models simultaneously by applying gradient descent to minimize the sum of the two cost functions for the two models:
+Traditionally one might train these models consecutively and average their predictions in a suitable fashion to form the ensemble. We can train both models simultaneously by applying gradient descent to minimize the sum of the two cost functions for the two models:
 \begin{equation}\label{eq:ensemble}
  \mathrm{Cost^{ens}} = \mathrm{Cost}^{ST} + \mathrm{Cost}^{M}.
  \end{equation}
 Typically, averaging the predictions reduces variance in the ensemble model's predictions and can improve generalization error. 
 
-Below we will compare this approach to a collaborative approach, where after every iteration of training the models to the labeled data we will have the model `collaborate' by replacing \eqref{eq:ensemble} with 
+Below we will compare this approach to a collaborative approach, where we will have the model `collaborate' by replacing \eqref{eq:ensemble} with 
 \begin{equation}\label{eq:collab}
  \mathrm{Cost^{coll}} = \mathrm{Cost^{ens}} + \alpha \cdot \mathrm{Collab}.
 \end{equation} 
 Here $\mathrm{Collab}$ will be the `collaboration method' which will be one of three functions which measures the distance between the predictions produced by the models and $\alpha$ will be a `collaboration weight' which will dictate how much we want to emphasize collaboration versus learning from the hard targets. Both the choice of the collaboration method and the collaboration weight are hyperparameters. After this rephrasing, we can regard this project as a simple hyperparameter search.
 
 \subsubsection{Collaborative learning}\label{sec:collab}
-Before we make precise how our models will collaborate, we will recall how a neural network classifier is trained. Suppose that our classification problem is to find a function $f(x)=(f_1(x),\dots, f_n(x))$ approximating the labeling $x \mapsto y(x)=(y_1(x),\dots, y_n(x))$, here $y(x)$ is the one-hot encoding of a given classification of $x$ into one of $n$-classes. In other words, if $x$ belongs to the $i$th class, then $y_j(x)=\delta_{i,j}$. 
+Before we make precise how our models will collaborate, we will recall how a neural network classifier is trained. Suppose that our classification problem is to find a function $f(x)=(f_1(x),\dots, f_n(x))$ approximating the labeling $x \mapsto y(x)=(y_1(x),\dots, y_n(x))$, where $y(x)$ is the one-hot encoding of a given classification of $x$ into one of $n$-classes. In other words, if $x$ belongs to the $i$th class, then $y_j(x)=\delta_{i,j}$. 
 
 Our models will have the form \[f(x)=\textrm{Softmax}(g(x))=\frac{1}{\sum e^{g_i(x)}}(g_1(x),\dots, g_n(x)),\] where $g(x)$ is the vector of unscaled logits our model produces and implicitly a function of a parameter vector $\theta$. Such models are typically trained by attempting to minimize the cross-entropy of $f$ with $y(x)$:
 \begin{align*}
@@ -300,11 +301,11 @@ We propose a similar implementation, but now we have the models learn simultaneo
 	\item (L1) $\mathrm{Cost}^{L1}=\sum |g_i^{(1)}(x)-g_i^{(2)}(x)|.$
 \end{enumerate}
 
-All of these cost functions are clearly non-negative. The first two obviously have global minima when the two models produce identical unscaled logits, so the cost functions are zero. Turning to the symmetric cross entropy function, when the two models produce identical predictions then the symmetric cross entropy is equal to double the entropy of the (common) model's predicted distribution. If these models were able to minimizing the given cost function, then this distribution will have zero entropy and the model will have a global minimum. The upshot is that the collaborative models have theoretical global minima equal to those of their  non-collaborative models and, a priori, collaboration does not necessarily obstruct learning the ideal function.
+All of these cost functions are clearly non-negative. The first two obviously have global minima when the two models produce identical unscaled logits, so the cost functions are zero. Turning to the symmetric cross entropy function, when the two models produce identical predictions then the symmetric cross entropy is equal to double the entropy of the (common) model's predicted distribution. If these models were able to minimize the given cost function, then this distribution will have zero entropy and the model will have a global minimum. The upshot is that the collaborative models have theoretical global minima equal to those of their  non-collaborative models and, a priori, collaboration does not necessarily obstruct learning the ideal function.
 
-On the other hand, it is clear that when $\alpha \gg 0$ is very large, the backpropagation algorithm will prioritize minimizing the collaboration cost function over the ensemble cost function. This forces to push the individual models to try to solve the classification problem \emph{while} producing identical predictions; a significantly more difficult task.
+On the other hand, it is clear that when $\alpha \gg 0$ is very large, the backpropagation algorithm will prioritize minimizing the collaboration cost function over the ensemble cost function. This forces the individual models to try to solve the classification problem \emph{while} producing identical predictions; a significantly more difficult task.
 
-The hope is that we can train a simpler model to have much better performance characteristics than it would otherwise and perhaps better than that of a model constructed by distillation/compression techniques \cite{Distillation,Compression}, although we will not be able to test this hypothesis due to time and resource constraints (see \Cref{ouraxiom} below). 
+We will train a simpler model to have much better performance characteristics than it would otherwise and perhaps better than that of a model constructed by distillation/compression techniques \cite{Distillation,Compression}. However, we will not be able to test this hypothesis here due to time and resource constraints (see \Cref{ouraxiom} below). 
 % with respect to the hard targets to a linear combination of that cost function with either 1) the cross-entropy with the other model or 2) the average sum of squares difference between the unscaled logits of the two models.  The exact choice of cost function will be a hyperparameter that we will investigate. We note, by calculating the gradients, that choice 1) will cause the model outputs to converge uniformly toward each other, while 2) will cause the outputs to converge toward each other at a rate proportional to their difference. The second choice will have the outcome that it will force the models to be very close to each other rather quickly, while allowing the models to have a small amount of wiggle room when their outputs are on average less than a unit apart. 
 
 \subsection{Metrics}
@@ -319,7 +320,7 @@ Below we will evaluate the models by examining the average value of their respec
 We will base our analysis on 3 publicly available datasets: the MNIST,  notMNIST, and CIFAR10 datasets. 
 
 \subsubsection{MNIST Dataset}
-The first dataset is the MNIST dataset and is perhaps the urdataset for image classification benchmarks. It consists of 50k training and 10k test 28x28x1 images of handwritten digits (see \Cref{MNISTFig}). As a standard dataset it will be easy to compare our performance to other published models. There are many approaches that can drop the error rate below 5 percent and most modern approaches should drop the error rate below 2 percent.  As shown below our models will obtain an error rate of approximately 0.5\%.
+The first dataset is the MNIST dataset and is perhaps the urdataset for image classification benchmarks. It consists of 50k training and 10k test 28x28x1 images of handwritten digits (see \Cref{MNISTFig}). As a standard dataset it will be easy to compare our performance to other published models. On this dataset, there are many approaches that can drop the error rate below 5 percent and most modern approaches should drop the error rate below 2 percent.  As shown below our models will obtain an error rate of approximately 0.5\%.
 \begin{figure}[H]
 	\begin{center} \includegraphics[scale=0.5]{images/MNIST_Sample_Images.png}\end{center}
 	\caption{MNIST Sample Images}\label{MNISTFig}
@@ -362,7 +363,7 @@ All of these datasets are available for free online, and our provided code autom
 \end{subfigure}
 \caption{Similar MNIST images with distinct classifications.}\label{Fig:Similar}
 \end{figure}
-To illustrate our discussion from \Cref{sec:collab}, we consider the MNIST dataset and perform a principal component projection to $\mathbb{R}^2$. This projection is chosen so that the projection to $x$-axis  from the original dataset has the greatest variance in its image, while the projection to the $y$-axis produces the greatest variance in its image when restricted to the kernel of the projection to the $x$-axis. More informally this projection is chosen to spread out the data points as much as possible by maximizing the variance.
+To illustrate our discussion from \Cref{sec:collab}, we consider the MNIST dataset and perform a principal component projection to $\mathbb{R}^2$. This projection is chosen so that the projection to $x$-axis  from the original dataset has the greatest variance in its image, while the projection to the $y$-axis produces the greatest variance in its image on the orthogonal complement of the  projection to the $x$-axis. More informally this projection is chosen to spread out the data points as much as possible by maximizing the variance.
 
 We have shamelessly stolen the visualization in \Cref{Fig:Similar} from Chris Olah's blog \cite{VisMNIST}. Each of the subfigures contains an image of the 2D PCA projection of a subset of the MNIST dataset. In each of the two images we have drawn attention to a different data point (indicated by a star). These two points are very close to each other in the projection (and they are visually quite similar) although they correspond to samples with different classifications.  One of the themes of this project is that a learned embedding which properly encodes the visual structure should also map these two points to relatively nearby points in unscaled logit space, but standardized supervised learning techniques will attempt to push these points as far as part as possible, as if the two images were radically different.
 
@@ -377,7 +378,7 @@ As mentioned above, all of our networks are modeled on the ResNet architecture \
 Our choice of using the ResNet architecture was based on two  reasons: 1) We wanted an architecture where it was straightforward to produce both deep and shallow variants and 2) we wanted an architecture which has been shown to have state of the art performance on competitive datasets.
 
 \begin{remark}\label{rem:CIFAR10}
-	Although the models I have trained all perform respectably on the given datasets, they are unable to match the state of the art performance on the CIFAR-10 dataset recorded in \cite{ResNet} (the error rates for my models trained with data augmentation was closer to 15\%, instead of the sub-10\% error rates they obtain). Examining implementations online of this architecture, it appears that there are quite a few subtleties that are left out of the paper and that replicating their results requires making some choices and may have depended on the implementations of the algorithms they used (e.g., see the comments in \cite{GitResnet}). 
+	Although the models I have trained all perform respectably on the given datasets, they are unable to match the state of the art performance on the CIFAR-10 dataset recorded in \cite{ResNet} (the error rates for my models trained with data augmentation was closer to 15\%, instead of the sub-10\% error rates they obtain). Examining implementations online of this architecture, it appears that there are quite a few subtleties that are left out of the paper and that replicating their results requires making some choices and may have depended on the implementations of the algorithms they used (e.g., see the comments on their Git repository \cite{GitResnet}). 
 
 	Another subtlety I noticed is that \cite{ResNet} appears to not be counting the huge number of learned parameters in the batch normalization layers. I was under the impression that one counts parameters for a couple of reasons: First, parameters are one source of memory constraints and second, the number of parameters indicates the ability of the model to memorize a dataset. If this is the goal, the batch normalization parameters need to be counted for, at least, the first reason. Depending on how the batch normalization is implemented (e.g., if it can learn the identity function), then it should also be counted for the second reason. 
 
@@ -392,17 +393,17 @@ We will discuss the choices of hyperparameters in the implementation section.
 % Is it made clear how the input data or datasets will be handled by the algorithms and techniques chosen?
 \subsection{Benchmark}
 
-As already indicated, we will test the performance of our collaboratively trained models against the benchmark set by the individual models when trained in an ensemble using the standard summary statistics (value of the cost/loss function and the error).  The ensemble benchmark will give us reference values for how well the models perform when trained individually. We will then compare this to how the models perform when we add the collaboration learning steps.
+As already indicated, we will test the performance of our collaboratively trained models against the benchmark set by the individual models when trained in an ensemble using the standard summary statistics (value of the cost/loss function and the error).  The ensemble benchmark will give us reference values for how well the models perform when trained individually. We will then compare this to how the models perform when we add in the collaboration cost functions.
 % In this section, you will need to provide a clearly defined benchmark result or threshold for comparing across performances obtained by your solution. The reasoning behind the benchmark (in the case where it is not an established result) should be discussed. Questions to ask yourself when writing this section:
 
 % Has some result or value been provided that acts as a benchmark for measuring performance?
 % Is it clear how this result or value was obtained (whether by data or by hypothesis)?
 
 \section{Methodology}
-Before diving into the details of our methods we would like to point to a fact of life which has become clear to us, while preparing this project. 
-\begin{axiom}\label{ouraxiom}
+Before diving into the details of our methods we would like to point to a fact of life which became very clear to us while preparing this project. 
+\begin{obs}\label{ouraxiom}
 	Training deep neural networks is time consuming and expensive. 
-\end{axiom}
+\end{obs}
 
 \Cref{ouraxiom} comes from the author's experience of spending \$175 on Amazon web services to train these models. Roughly half of this was spent on tuning and debugging and the other half was spent training the final models which took 3 days on a P2xlarge instance (my first runs on G2 instances were prone to crashing due to the limited GPU memory, although this was most likely due to a bug that was later corrected). While many of our design decisions are probably suboptimal, they can typically be explained by \Cref{ouraxiom}.
 
@@ -421,7 +422,7 @@ Each of the models we have used begins with a batch normalization layer, which e
 \end{enumerate}
 \section{Implementation}
 \subsection{Code structure}
-We have implemented this project in Python using Tensorflow 1.1. We have written our own implementation of the above mentioned variation of the ResNet architecture. Because of the need to run so many different models and, at least during parameter tuning, to test against so many different choices of parameters we needed to write a Model class that encompassed many of the variations that we needed to consider. Each model consists of a Tensorflow graph for a given neural network, a reference to a batch manager class, and commands to train the network, gather the statistics, and arrange for the statistics to be logged by Logger classes. The model's train functions perform regular backups of model checkpoints and pickles the accumulated statistical data.
+We have implemented this project in Python using Tensorflow 1.1. We have written our own implementation of the above mentioned variation of the ResNet architecture. Because of the need to run so many different models and, at least during parameter tuning, to test against so many different choices of hyperparameters, we needed to write a Model class that made it simpler to consider the many varieties of ensembles. Each model consists of a Tensorflow graph for a given neural network/ensemble, a reference to a batch manager class, and commands to train the network, gather the statistics, and arrange for the statistics to be logged by Logger classes. The model's train functions perform regular backups of model checkpoints and pickles the accumulated statistical data.
 
 The relatively short implementation of the ResNet network is contained in the `resnet.py' file. The batch manager class gives the input pipeline and returns transformed batches. 
 
@@ -431,7 +432,7 @@ The Logger class is responsible for logging and pickling data, as well as loggin
 Since the model is changing after each batch. It did not seem appropriate to average the statistics for the training data over each epoch. Instead we perform a running weighted average over each epoch. This provides better estimates in the early epochs when the model's performance is rapidly improving. However on the MNIST dataset, the models eventually approximate state of the art performance and can run into long streaks of perfect predictions which cause the model to incorrectly return 0\% error rates. In hindsight, I would have used statistics that were averaged over each epoch. We did not do this because of \Cref{ouraxiom}.
 \end{remark}
 
-The Model class has two subclasses: SingleModel and EnsembleModel. The SingleModel runs a single model and is a simplified form of the EnsembleModel which can train multiple models on the same task with or without collaboration. 
+The Model class has two subclasses: SingleModel and EnsembleModel. The SingleModel runs a single model and is a simplified form of the EnsembleModel which trains multiple models on the same task with or without collaboration. 
 
 The datasets file includes code for downloading, preprocessing, and generating sample images from the datasets. The code for handling the notMNIST dataset is directly taken from the Tensorflow example code and is not due to myself. 
 
@@ -462,10 +463,12 @@ Sorry to spoil the surprise, but we chose to use the symmetric cross entropy fun
 
 One reason to consider the sum of squares distance is that the gradient is proportional to the difference between the logits. So as the difference approaches zero the magnitude of the gradient decreases which will give the models a bit more room to try to match the hard prediction labels. While the Manhattan distance always has a gradient which is a unit multiple of the derivative of the logits (except when the distance is zero and the derivative is not uniquely defined).
 
-We scale all of our collaboration costs functions by a hyperparameter $\alpha \in \{0.0001, 0.01, 0.1, 1.0\}$ called the collaboration weight and trained the following variations of our ensembles:
+Our implementation allows for ensembles of arbitrary size, in which case the collaborative cost functions are formed as a sum over consecutive models of functions of the above form. Due to \Cref{ouraxiom}, we only apply this to ensembles of size 2 below.
+
+We scale all of our collaboration cost functions by a hyperparameter $\alpha \in \{0.0001, 0.01, 0.1, 1.0\}$ called the collaboration weight and trained the following variations of our ensembles:
 \begin{enumerate}
 	\item Standard ensemble of ST and M models.
-	\item Collaborative ensemble of ST and M models ($\alpha \in \{0.0001, 0.01. 0.1, 1.0\}$):
+	\item Collaborative ensemble of ST and M models where $\alpha \in \{0.0001, 0.01. 0.1, 1.0\}$:
 	\begin{enumerate}
 		\item Collaborative cost function = $\alpha \cdot SCE$.
 		\item Collaborative cost function = $\alpha \cdot L2$.
@@ -508,7 +511,7 @@ For the first task we wanted to find a shallow and thin model that was still abl
 	\item The first convolutional layer only has 4 filter dimensions to map into. If the layer is supposed to reconstruct the image exactly and we have a color image (so 3 filters to begin with) this only leaves one independent dimension for a learned feature and minimal room to move the points in the sample space. 
 	\item Because the model's penultimate layer has dimension 32, this yields a fairly constrained space to construct the linearly embedding $\mathbb{R}^{32}\to \mathbb{R}^{10}$ to the unscaled logits which separates the classes. 
 \end{enumerate}
-Experiments with a feature depth of 8, yielded reasonable results, so we used this for the ST model and doubled it for the M model. The models from \cite{ResNet} use 3 bricks ($B=3$), so we decided to follow their lead and use this for both models. This only left the choice of how many convolutional layers to include in each brick which is encoded in the choice of $R$. We settled on $R=1$ and $R=2$ for the ST and M models respectively\footnote{Although one can argue that a CNN with 10 convolutional layers is not `shallow', this is probably a matter of perspective. It is definitely shallower than the 50+ layer models that are now in use.}. Again this choice was primarily dictated by \Cref{ouraxiom}; it would have made more sense to have set $R$ to be at least 5 for the medium model, if we were to expect near state of the art results. 
+Experiments with a feature depth of 8, yielded reasonable results, so we used this for the ST model and doubled it for the M model. The models from \cite{ResNet} use 3 bricks ($B=3$), so we decided to follow their lead and use this for both models. This only left the choice of how many convolutional layers to include in each brick which is encoded in the choice of $R$. We settled on $R=1$ and $R=2$ for the ST and M models respectively\footnote{Although one can argue that a CNN with 10 convolutional layers is not `shallow', this is probably a matter of perspective. It is definitely shallower than the 50+ layer models that are now in use.}. Again this choice was primarily dictated by \Cref{ouraxiom}; if we were to expect near state of the art results, it would have made more sense to have set $R$ to be at least 5 for the medium model. 
 
 In order to reduce the training time (see \Cref{ouraxiom}), we experimented with very small mini-batches, working our way up from 16, by powers of 2. The small mini-batches worked, but produced extremely noisy statistics and we eventually settled on a mini-batch size of 64. 
 
@@ -520,21 +523,22 @@ Do to \Cref{ouraxiom}, we did not retrain the entire collection of 78 neural net
 % Are intermediate and final solutions clearly reported as the process is improved?
 \section{Results}
 \subsection{Model evaluation and validation}
-After we trained our 78 models we have generated a lot of data which was pickled and squirreled away into 39 files. In the analysis file we gather the pickle data and store it in a single pandas data frame to make it easy to slice up for our analysis. Since we have considered 3 different collaboration methods, each with 4 possible collaboration weights, on 3 different datasets, we will do a preliminary analysis to see which combinations of collaboration methods and weights produced the best outcomes in terms of test error. We will then proceed with a more detailed analysis of the better performing collaborative models. 
+After we trained our 78 models we have generated a lot of data which was pickled and squirreled away into 39 files. In the analysis file we gather the pickle data from each dataset and store it in a single pandas data frame to make it easy to slice up for our analysis. Since we have considered 3 different collaboration methods, each with 4 possible collaboration weights, on 3 different datasets, we will do a preliminary analysis to see which combinations of collaboration methods and weights produced the best outcomes in terms of test error. We will then proceed with a more detailed analysis of the better performing collaborative models. 
 
 Since we are considering so many models simultaneously we will focus our graphs and hence our attention on the final 10 training epochs and near the best performing models. The collaboratively trained models are all drawn in color and the traditionally trained models are in shades of gray.
 
-We begin by considering the performance on the MNIST dataset in \Cref{STMNISTFig,MMNISTFig} which is located in the appendix. The careful reader will notice that there are not enough lines on the charts for the `L2' and `L1' collaborative models. This is because these models with collaboration weight $\alpha=1$ did poorly enough that they do not show up on these graphs\footnote{Adjusting the limits of the graphs to include these extra lines, made the graphs illegible.}. This illustrates that with large collaboration weights, the training process will primarily focus on making the models collaborate instead of fitting the data. 
+We begin by considering the performance on the MNIST dataset in \Cref{STMNISTFig,MMNISTFig} which are located in the appendix below. The careful reader will notice that there are not enough lines on the charts for the `L2' and `L1' collaborative models. This is because these methods with collaboration weight $\alpha=1$ did so poorly that they do not show up on these graphs\footnote{Adjusting the limits of the graphs to include these extra lines made the graphs illegible.}. This illustrates that with large collaboration weights, the training process will primarily focus on making the models collaborate instead of fitting the data. 
 
-While this was expected, what was not expected is that this is not such a factor when we learn with the symmetric cross entropy method.  A plausible explanation for this is by examining the gradients of these different cost functions. The gradients with respect to the symmetric cross entropy functions involve a sum of two terms, the first term we calculated above. This adjusts a logit for the first model at a rate proportional to the difference of the two models predictions. The second term is proportional to $p_i^{(1)}(1-p_i^{(1)})\log p_i^{(2)}$, which will become very small as the first model becomes confident in its predictions. So if the model has become reasonably confident in its predictions, the first term will dominate and we see that the gradients are essentially proportional to the difference between the two predictions (which will always be less than 1). This is in contrast to the gradients with respect to the L2 collaboration method which will be proportional to the difference between the unscaled logits which, by examining the values of these logits, will generally be larger than the difference between the predictions. The L1 norm will always be adjusting the unscaled logits by a factor of $\pm 1$, which will again be larger in magnitude than the difference in the predictions. So the latter two collaboration methods typically emphasize collaboration more.
+While this was expected, what was not expected is that this is not such a factor when we learn with the symmetric cross entropy method.  A plausible explanation for this is by examining the gradients of these different cost functions. The gradients with respect to the symmetric cross entropy functions involve a sum of two terms, the first term we calculated above. This adjusts a logit for the first model at a rate proportional to the difference of the two models predictions. The second term is proportional to $p_i^{(1)}(1-p_i^{(1)})\log p_i^{(2)}$, which will become very small as the first model becomes confident in its predictions. So if the model has become reasonably confident in its predictions, the first term will dominate and we see that the gradients are essentially proportional to the difference between the two predictions (which will always be less than 1). This is in contrast to the gradients with respect to the L2 collaboration method which will be proportional to the difference between the \emph{unscaled logits} which, by examining the values of these logits, will generally be larger than the difference between the predictions. The L1 norm will always be adjusting the unscaled logits by a factor of $\pm 1$, which will again be larger in magnitude than the difference in the predictions. So the latter two collaboration methods typically emphasize collaboration more.
 
 Looking over the charts in \Cref{STMNISTFig,MMNISTFig,STnotMNISTFig,MnotMNISTFig,STCIFAR10Fig,MCIFAR10Fig} and the tables in \Cref{MNISTTab,MNISTCTab,notMNISTTab,notMNISTCTab,CIFAR10Tab,CIFAR10CTab} (which are located in the appendix), there are a few important observations to make:
 \begin{enumerate}
 	\item Collaborative models usually outperform their traditionally trained counterparts: On \emph{every} dataset at least 2 (and often more) of the collaborative models obtained lower test error than their counterparts trained in isolation.
-	\item The collaboratively trained ST models can closely approximate the traditionally trained M models. This allows us to get similar performance with 20\% as many parameters and a threefold speedup.
+	\item The collaboratively trained ST models can approximate the traditionally trained M models. This allows us to get comparable performance with 20\% as many parameters and a threefold speedup.
 	\item The traditionally trained ensembles out perform each of their constituents (as expected) and these models can be closely approximated by a single medium depth model that was trained in collaboration (obtaining a noticeable improvement in both memory and runtime over the ensemble model).
 	\item All three collaboration methods yield improvements provided the collaboration rate is not too large and even for very small collaboration weights, we will often see an improvement.
-	\item For symmetric cross entropy a collaboration weight of approximately 1 does well. For L2 and L1 values between 0.01 and 0.1 generally do well.
+	\item For symmetric cross entropy a collaboration weight of approximately 1 does well. For the L2 and L1 methods, smaller values generally do well.
+	\item The performance of collaborative ensembles improves as the degree of the collaboration decreases. This makes sense since this will increase the variance in their predictions. But even with very low collaboration weights, the individual models still outperform their traditional counterparts, so the corresponding collaborative ensemble has better performance than the traditional ensemble.
 \end{enumerate}
 
 We will now further examine the collaborative model which generally yielded the best results: The L2 method with weight 0.01. We will examine the training behavior and see how the collaborative models perform with respect to overfitting.  Examining \Cref{FinMNISTFig,FinnotMNISTFig,FinCIFAR10Fig} in the appendix, we can make a few observations:
@@ -544,9 +548,8 @@ We will now further examine the collaborative model which generally yielded the 
 	\item On the notMNIST dataset, whose training set has roughly a 6.5\% misclassification rate\footnote{As a consequence all models do better on the test set (which has a 0.5\% misclassification rate) than on the training set.}, we see that the collaborative models are noticeably more resistant to overfitting, while still obtaining comparable results.
 	\item On the CIFAR10 dataset, the collaborative models have very similar learning curves on the training set compared to their traditionally trained counterparts, yet they outperform these models on the test set.
 	\item The models in the collaborative ensembles have more similar performance characteristics than those in traditional ensembles (as one should expect).
-	\item The performance of collaborative ensembles improves as the degree of the collaboration decreases. This makes sense since this will increase the variance in their predictions. But even with very low collaboration weights, the individual models still outperform their traditional counterparts, so the corresponding collaborative ensemble has better performance than the traditional ensemble.
 \end{enumerate}
-It appears that the collaborative learning has a noticeable regularization effect on the models which makes them more resistant to overfitting similar to ensembles (it is hard for distinct models to overfit the data so that they generate highly correlated responses on new data). This may also be the source of the smoothing for the learning curves as the collaborative models are forced to make parameter adjustments that produce similar outputs which constrains the optimization problem in a constructive way (but this is just speculation).
+It appears that the collaborative learning has a noticeable regularization effect on the models which makes them more resistant to overfitting, this is similar to the behavior of ensembles (it is hard for distinct models to overfit the data in a way such that they generate highly correlated responses on new data). This may also be the source of the smoothing for the learning curves as the collaborative models are forced to make parameter adjustments that produce similar outputs which constrains the optimization problem in a constructive way (but this is just speculation).
 % In this section, the final model and any supporting qualities should be evaluated in detail. It should be clear how the final model was derived and why this model was chosen. In addition, some type of analysis should be used to validate the robustness of this model and its solution, such as manipulating the input data or environment to see how the model’s solution is affected (this is called sensitivity analysis). Questions to ask yourself when writing this section:
 
 % Is the final model reasonable and aligning with solution expectations? Are the final parameters of the model appropriate?
@@ -567,7 +570,7 @@ We can see that for any of the above collaborative methods and most choices of w
 	\begin{center} \includegraphics[scale=0.4]{images/cybermen.jpg}\end{center}
 	\caption{Do not fear the collective.}\label{cybermen}
 \end{figure}
-Considering the above analysis, we conclude that are obvious and immediate benefits to training a collective of learning machines to solve a given task. If putting two neural networks together can produce such noticeable benefits, it is natural to ask what benefits we can get from ever larger and more varied collectives. After all, what is the worst thing that can happen (see \Cref{cybermen})?
+Considering the above analysis, we conclude that are obvious and immediate benefits to training a collective of learning machines to solve a given task. If putting two neural networks together can produce such noticeable benefits, it is natural to ask what benefits we can get from ever larger and more varied collectives. After all, what is the worst thing that can happen? See \Cref{cybermen}.
 % In this section, you will need to provide some form of visualization that emphasizes an important quality about the project. It is much more free-form, but should reasonably support a significant result or characteristic about the problem that you want to discuss. Questions to ask yourself when writing this section:
 
 % Have you visualized a relevant or important quality about the problem, dataset, input data, or results?
@@ -575,11 +578,11 @@ Considering the above analysis, we conclude that are obvious and immediate benef
 % If a plot is provided, are the axes, title, and datum clearly defined?
 
 \subsection{Reflection}
-We have trained a large number of convolutional neural networks of varying depth under a variety of collaborative training methods. For most reasonable choices of hyperparameters these collaborative ensembles modestly outperform traditional ensembles on three publicly available datasets. Although the results of the collaborative ensembles are very close to those of the traditional ensembles, with many choices of hyperparameters, collaboratively trained \emph{individual} models outperform the traditionally trained counterparts by a more significant margin. This performance enhancement comes at virtually no cost provided that the computer has sufficient memory to train the models simultaneously. 
+We have trained a large number of convolutional neural networks of varying depth under a variety of collaborative training methods. For most reasonable choices of hyperparameters these collaborative ensembles modestly outperform traditional ensembles on three publicly available datasets. For larger collaboration weights, the collaborative ensembles are very close to those of the traditional ensembles. However, these collaboratively trained \emph{individual} models outperform the traditionally trained counterparts by a more significant margin. Moreover, for very small collaboration weights, the collaborative ensembles outperform the traditional ensembles. These performance enhancements come at virtually no cost provided that the computer has sufficient memory to train the models simultaneously. 
 
-Developing a project on this scale has been quite educational. Training so many models, gathering all of the resultant data, and combining it into understandable representations has required quite a bit more work than the `quick-and-dirty' deep learning tutorials that one typically runs across. I have personally experienced the difficulty of fine-tuning of hyperparameters on this scale (see \Cref{ouraxiom}), as well as the manifold problems involved in debugging such networks. 
+Developing a project on this scale has been quite educational. Training so many models, gathering all of the resultant data, and combining it into understandable representations has required quite a bit more work than the `quick-and-dirty' deep learning tutorials that one typically runs across\footnote{I would estimate that I have spent roughly 5 times as much time on this project as I have on all of the others combined.}. I have personally experienced the difficulty of fine-tuning of hyperparameters on this scale (see \Cref{ouraxiom}), as well as the manifold problems involved in debugging such networks. 
 
-Although, I believe that this project would benefit from further study, I view at as a modest success. Although it does not appear that the deeper models learn any faster when trained collaboratively, they actually do improve by working with a weaker model. To the author, this is a surprise and warrants further investigation.
+Although, I believe that this project would benefit from further study, I view at as a success. Although it does not appear that the deeper models learn any faster when trained collaboratively, they actually do improve by working with a weaker model. To the author, this is a surprise and warrants further investigation.
 % In this section, you will summarize the entire end-to-end problem solution and discuss one or two particular aspects of the project you found interesting or difficult. You are expected to reflect on the project as a whole to show that you have a firm understanding of the entire process employed in your work. Questions to ask yourself when writing this section:
 
 % Have you thoroughly summarized the entire process you used for this project?
@@ -591,10 +594,10 @@ Now that we have identified reasonable collaboration methods and hyperparameters
 \begin{enumerate}
 	\item Do our results persist if we train the models for longer? If we add data augmentation?
 	\item What happens if we change the collaboration weight over time? 
-	\item What if we consider asymmetric collaborations where weaker models are forced to collaborate more than stronger ones?
-	\item What happens when we make the ensembles larger? (The provided code is already designed for this generality)
+	\item What if we consider asymmetric collaborations where some models are forced to collaborate more than others?
+	\item What happens when we make the ensembles larger? The provided code is already designed for this generality.
 	\item What happens when the ensembles consist of identical architectures? Do we still see such regularization effects?
-	\item Can a Very deep model's performance be improved by working with such a shallow and thin model?
+	\item Can a Very Deep Model's performance be improved by working with such a shallow and thin model?
 	\item We can easily separate the collaborative learning step from the training step. An important property of learning to collaborate is that \emph{it does not require labeled training data.} In principle, a collaborative ensemble can learn to come to a consensus on any unlabeled dataset, even random noise. It would be interesting to see if mixing collaborative training and traditional training can produce even better outcomes and whether it is actually important to feed in similar data for the learning process. 
 \end{enumerate}
 

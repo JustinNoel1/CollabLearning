@@ -116,8 +116,8 @@ def train_single_models(total_images, total_labels, image_shape, test_length, au
     #train_model(total_images, total_labels, params) 
 
     #New deep model params
-    params['num_times'] = 3 
-    params['filename'] =  base_name + '_single_data_aug' + '3_times_'
+    params['num_times'] = 5 
+    params['filename'] =  base_name + '_single_data_aug' + '5_times_'
     train_model(total_images, total_labels, params)
 
 def train_collab_models(total_images, total_labels, image_shape, test_length, aug_params, data_dir, base_name):
