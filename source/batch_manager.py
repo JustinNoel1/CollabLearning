@@ -6,10 +6,12 @@ import numpy as np
 class batch_manager(object): 
 	"""The batch manager class manages the batches. It is responsible for preprocessing and returning batches."""
 	def __init__(self, data, labels, valid_num, OneHot = True, aug_params = None, shape = [32, 32, 3]): 
-		"""valid_num : number of samples to set aside for testing. Taken from the end of data and labels.
-		OneHot : if True one hot encode the labels
-		aug_params : a dictionary of data preprocessing commands to be past to the keras image preprocessor.
-		shape : the shape of the image samples 
+		"""
+		Args:
+			valid_num : number of samples to set aside for testing. Taken from the end of data and labels.
+			OneHot : if True one hot encode the labels
+			aug_params : a dictionary of data preprocessing commands to be past to the keras image preprocessor.
+			shape : the shape of the image samples 
 		"""
 		self.shape = shape
 
@@ -45,44 +47,17 @@ class batch_manager(object):
 		if self.distort: 
 			#Build a moderate data augmentor using parameters 
 			self.idg = tf.contrib.keras.preprocessing.image.ImageDataGenerator(**aug_params) 
-			#set transformation (note that for some reason, on grey scale images the output of the transform
-			#is squeezed yielding an inconsistent shape
 			self.trans = lambda x: self.idg.random_transform(x)
 
-	# def get_batch(self, batch_size, distort = False, shuffle = True): 
-	# 	"""Returns the next batch for training.
-	# 	    distort : if true apply data augmentation preprocessing.
-	# 	    shuffle : if true return a random selection of samples
-	# 	"""
-	# 	if self.batched+batch_size >= self.train_length: 
-	# 		#increase epoch 
-	# 		self.epoch+=1
-		
-	# 	#Random batch
-	# 	if shuffle: 
-	# 		selections = np.random.randint(self.train_length, size = batch_size) 
-	# 	#Sequential batch 
-	# 	else:
-	# 		#if we are about to complete an epoch wrap the batch
-	# 		if self.batched+batch_size >= self.train_length:
-	# 			selections = list(range(batch_size - (self.train_length - self.batched))) + list(range(self.batched, self.train_length))
-	# 		else: 
-	# 			selections = range(self.batched, self.batched + batch_size)
-	# 	data, labels = self.train_data[selections, :], self.train_labels[selections, :] 
-
-
-	# 	#Increment our counters 
-	# 	self.total_batched += batch_size 
-	# 	self.batched = (batch_size+self.batched) % self.train_length 
-
-	# 	if distort:
- #        			#in place transformation
- #            		for i, im in enumerate(data):
-	# 	                data[i]=self.trans(im)
-	# 	return data, labels 
-
 	def train_batches(self, batch_size, shuffle = False, distort = False):
- 		"""This is a generator for yielding validation batches. Batch validation is required when we have limited memory."""
+ 		"""
+ 		This is a generator for yielding training batches.
+
+ 		Args: 
+ 			batch_size (int) : size of batch to grab
+ 			shuffle (bool) : whether or not to do bootstrap sampling
+ 			distort (bool) : whether or not to distort the sample images
+ 		"""
  		batched = 0 
 
  		while batched <= self.train_length: 
@@ -97,8 +72,6 @@ class batch_manager(object):
  					data[i]=self.trans(im) 
  			batched+=batch_size 
  			yield data, labels
- 		# #last, potentially shorter batch 
- 		# yield self.train_data[batched : ], self.train_labels[batched : ]
 
 	def valid_batches(self, batch_size): 
 		"""This is a generator for yielding validation batches. Batch validation is required when we have limited memory."""
@@ -109,11 +82,3 @@ class batch_manager(object):
 			batched+=batch_size
 		#last, potentially shorter batch
 		yield self.valid_data[batched : ], self.valid_labels[batched : ]
-
-	# def batch_gen(data, labels, batch_size):
-	# 	batched = 0
-	# 	while batched + batch_size < len(data):
-	# 		yield data[batched: batched + batch_size], labels[batched : batched + batch_size]
-	# 		batched+=batch_size
-	# 	#last, potentially shorter batch
-	# 	yield data[batched : ], labels[batched : ]		

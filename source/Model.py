@@ -47,8 +47,7 @@ class Model(object):
 		while self.batch.epoch <= self.epochs:
 	    		log_data = self.optimize(sess, feed_dict, self.batch.epoch)
 	    		self.log_batch(log_data) 
-
-	    			log_data = self.get_errors(sess, feed_dict, self.batch.epoch)
+    			log_data = self.get_errors(sess, feed_dict, self.batch.epoch)
     			self.log_epoch(log_data, sess)
 
 	#Interface that must be implemented by instances
@@ -457,40 +456,40 @@ def load_model(data, labels, filename, params, num_samples = 16):
 		labels (nparray) : labels
 		filename (str) : filename of tf checkpoint file
 		params (dict) : the parameters used to create that model
-		num_samples (int) : the number of parameters 
-    #reconstruct model without initializing parameters 
-    model = Model.get_model(data, labels, params)
+		num_samples (int) : the number of samples to evaluate on
 
-    saver = tf.train.Saver()
-    with tf.Session() as sess:
+		SAMPLE USAGE 
+		data, labels, image_shape = get_mnist() 
+		params = 'exact paramaters from model to reload' #(saved in pickle) 
+		load_model(data[:-10000], labels[:-10000], 'log_data/shallow_and_thin-30-0.01380002498626709.ckpt', params, 
+			num_samples = 10000)
+	"""
 
-        #restore parameters
-        saver.restore(sess, filename)
+	#reconstruct model without initializing parameters 
+	model = Model.get_model(data, labels, params) 
 
-        #Get samples data
-        enc = OneHotEncoder(sparse = False) 
-        OHElabels = enc.fit_transform(labels.reshape(-1,1)) 
-        data = data.reshape([-1]+params['image_shape'])
-        selections = np.random.randint(len(data), size = num_samples) 
-        tdata, tlabels = data[selections], OHElabels[selections] 
+	#Get sample data 
+	enc = OneHotEncoder(sparse = False) 
+	OHElabels = enc.fit_transform(labels.reshape(-1,1)) 
+	data = data.reshape([-1]+params['image_shape']) 
+	selections = np.random.randint(len(data), size = num_samples) 
+	tdata, tlabels = data[selections], OHElabels[selections]
 
-        feed_dict = {}
-        feed_dict[model.x] = tdata
-        feed_dict[model.y] = tlabels
-        feed_dict[model.training] = False
-        preds = sess.run(model.preds, feed_dict = feed_dict)
-        print("Predications:")
-        print(preds)
-        print("Labels:")
-        print(labels)
-        print("Bad Predictions:")
-        print(preds[preds != labels[selections]])
-        print("Correct Labels:")
-        print(labels[selections][preds != labels[selections]])
+	saver = tf.train.Saver() 
+	with tf.Session() as sess: 
+		#restore parameters 
+		saver.restore(sess, filename) 
 
-#SAMPLE USAGE
-#data, labels, image_shape = get_mnist()
-# params = 'exact paramaters from model to reload' (saved in pickle)
-#load_model(data[:-10000], labels[:-10000], 'log_data/shallow_and_thin-30-0.01380002498626709.ckpt', params, 
-#    num_samples = 10000)
-
+		feed_dict = {} 
+		feed_dict[model.x] = tdata 
+		feed_dict[model.y] = tlabels 
+		feed_dict[model.training] = False 
+		preds = sess.run(model.preds, feed_dict = feed_dict) 
+		print("Predications:") 
+		print(preds) 
+		print("Labels:") 
+		print(labels) 
+		print("Bad Predictions:") 
+		print(preds[preds != labels[selections]]) 
+		print("Correct Labels:") 
+		print(labels[selections][preds != labels[selections]])

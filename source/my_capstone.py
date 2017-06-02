@@ -249,7 +249,8 @@ def train_collab_models(total_images, total_labels, image_shape, test_length, au
         params['epochs'] = 15 
 
     #Test run with truncated data
-    # train_model(total_images, total_labels, params)   
+    train_model(total_images, total_labels, params)   
+    return
     # params['collab_method'] = 'cross_ent'
     # params['collab_weight'] = 10. 
     # params['filename'] = base_name + '_collab_' + 'truncated_test_CE_0.1x0'
@@ -303,8 +304,8 @@ def train_collab_models(total_images, total_labels, image_shape, test_length, au
 def train_models(total_images, total_labels, image_shape, test_length, aug_params, data_dir, base_name):
     """This trains the single, ensemble, and collaborative models according to the passed values."""
     train_collab_models(total_images, total_labels, image_shape, test_length, aug_params, data_dir, base_name)
-    train_ensemble_models(total_images, total_labels, image_shape, test_length, aug_params, data_dir, base_name)
-    train_single_models(total_images, total_labels, image_shape, test_length, aug_params, data_dir, base_name)
+    #train_ensemble_models(total_images, total_labels, image_shape, test_length, aug_params, data_dir, base_name)
+    #train_single_models(total_images, total_labels, image_shape, test_length, aug_params, data_dir, base_name)
 
 def train_mnist(data_dir): 
     """Train on the MNIST dataset and generate sample image file.
