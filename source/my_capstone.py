@@ -120,73 +120,6 @@ def train_single_models(total_images, total_labels, image_shape, test_length, au
     params['filename'] =  base_name + '_single_data_aug' + '3_times_'
     train_model(total_images, total_labels, params)
 
-def train_ensemble_models(total_images, total_labels, image_shape, test_length, aug_params, data_dir, base_name):
-    """Trains a collection of ensemble models according to hardcoded parameters
-
-    Args:
-        total_images (numpy array): all images including the test set
-        total_labels (numpy array):  all labels for the images
-        image_shape (length 3 list): the shape of the images
-        test_length (int): number of samples to be set aside for testing
-        aug_params (dict): dictionary of data augmentation settings
-        data_dir (str): directory to store data
-        base_name (str): filename prefix to indicate the dataset
-    """
-
-    #Testing parameters 
-    test_params = { 'act': tf.nn.relu, 
-        'data_dir' : os.path.join(data_dir, base_name, 'ensemble'),
-        'start_filter' : 4, 
-        'num_bricks': 3, 
-        'num_times' : 2, 
-        'batch_size' : 64, 
-        'epochs' : 11, 
-        'image_shape' : image_shape, 
-        'learning_rate' : 0.5**10, 
-        'data_augmentation' : None, 
-        'truncate_data' : True, 
-        'valid_num' : test_length, 
-        'shuffle' : False, 
-        'filename' : base_name + '_ensemble_' + 'test', 
-        'regularization_rate' : 0.1**4,
-        'model_type' : 'ensemble'}
-
-    #2x test params
-    #No data augmentation on test. The point is to check convergence and with a truncated dataset augmentation will
-    #hurt convergence
-    params = test_params.copy() #has the same general settings even if we don't use most of the parameters because 
-                                         #they are passed in the list of params
-    params['list_of_params'] = [test_params]*2
-    #rain_model(total_images, total_labels, params) 
-
-    #Train notMNIST for less time
-    if base_name != 'notMNIST':
-        params['epochs'] = 30 
-    else:
-        params['epochs'] = 15 
-
-    params['truncate_data'] = True 
-    params['data_augmentation'] = None 
-    st_params = params.copy()
-    st_params['start_filter'] = 8 
-    st_params['num_bricks'] = 3 
-    st_params['num_times'] = 1 
-
-    medium_params = st_params.copy()
-    #New medium model params 
-    medium_params['start_filter'] = 16 
-    medium_params['num_bricks'] = 3 
-    medium_params['num_times'] = 2 
-
-    #Add prefix to prevent overwriting log files 
-    params['filename'] = base_name + '_mixed_ensemble_' + 'shallow_and_thin_and_medium'
-
-    #Mixed ensemble
-    params['list_of_params'] = [st_params, medium_params]
-    #Train ensemble
-    assert(params['epochs']==30)
-    train_model(total_images, total_labels, params) 
-
 def train_collab_models(total_images, total_labels, image_shape, test_length, aug_params, data_dir, base_name):
     """Trains a collection of collaborative and traditional ensembles according to hardcoded parameters
 
@@ -255,16 +188,7 @@ def train_collab_models(total_images, total_labels, image_shape, test_length, au
     params['filename'] = base_name + '_collab_' + 'truncated_test_L2_0.1x2'
     train_model(total_images, total_labels, params)   
 
-    # params['collab_method'] = 'L2'
-    # params['collab_weight'] = 0.1**2
-    # params['filename'] = base_name + '_collab_' + 'truncated_test_L2_0.1x0'
-    # train_model(total_images, total_labels, params)   
-
-    # params['collab_method'] = 'L1'
-    # params['collab_weight'] = 0.1**2
-    # params['filename'] = base_name + '_collab_' + 'truncated_test_L1_0.1x0'
-    # train_model(total_images, total_labels, params)   
-
+    #ACTUAL RUN
     #First real run
     params['truncate_data'] = False 
     #Run ensemble
@@ -303,8 +227,7 @@ def train_collab_models(total_images, total_labels, image_shape, test_length, au
 def train_models(total_images, total_labels, image_shape, test_length, aug_params, data_dir, base_name):
     """This trains the single, ensemble, and collaborative models according to the passed values."""
     train_collab_models(total_images, total_labels, image_shape, test_length, aug_params, data_dir, base_name)
-    #train_ensemble_models(total_images, total_labels, image_shape, test_length, aug_params, data_dir, base_name)
-    #train_single_models(total_images, total_labels, image_shape, test_length, aug_params, data_dir, base_name)
+    train_single_models(total_images, total_labels, image_shape, test_length, aug_params, data_dir, base_name)
 
 def train_mnist(data_dir): 
     """Train on the MNIST dataset and generate sample image file.
