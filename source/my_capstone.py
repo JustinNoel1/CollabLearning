@@ -330,7 +330,7 @@ def train_mnist(data_dir):
     label_names = { 0 : '0', 1 : '1', 2 : '2', 3 : '3', 4 : '4', 5 : '5', 6 : '6', 7 : '7', 8 : '8', 9 : '9'}
     show_data(total_images, total_labels, label_names, shape = image_shape, title = "MNIST_Sample_Images", 
                   aug_params = None, output_dir = os.path.join('..', 'latex', 'images'))
-    #train_models(total_images, total_labels, image_shape, test_length, aug_params, data_dir, 'MNIST')
+    train_models(total_images, total_labels, image_shape, test_length, aug_params, data_dir, 'MNIST')
 
 def train_notmnist(data_dir): 
     """Train on the notMNIST dataset and generate sample image file.
@@ -356,7 +356,7 @@ def train_notmnist(data_dir):
     label_names = { 0 : 'A', 1 : 'B', 2 : 'C', 3 : 'D', 4 : 'E', 5 : 'F', 6 : 'G', 7 : 'H', 8 : 'I', 9 : 'J'}
     show_data(total_images, total_labels, label_names, shape = image_shape, title = "notMNIST_Sample_Images", 
               aug_params = None, output_dir = os.path.join('..', 'latex', 'images'))
-    #train_models(total_images, total_labels, image_shape, test_length, aug_params, data_dir, 'notMNIST')
+    train_models(total_images, total_labels, image_shape, test_length, aug_params, data_dir, 'notMNIST')
 
 def train_cifar10(data_dir): 
     """Train on the cifar10 dataset
@@ -382,7 +382,7 @@ def train_cifar10(data_dir):
     total_images, total_labels, image_shape, test_length = get_cifar() 
     show_data(total_images, total_labels, label_names, shape = image_shape, title = "CIFAR10_Sample_Images",
                       aug_params = None, output_dir = os.path.join('..', 'latex', 'images'))
-    #train_models(total_images, total_labels, image_shape, test_length, aug_params, data_dir, 'CIFAR10')
+    train_models(total_images, total_labels, image_shape, test_length, aug_params, data_dir, 'CIFAR10')
 
 #Train our models
 train_mnist('collab_logs')

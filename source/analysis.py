@@ -220,10 +220,12 @@ def analyze_model(ds, method, weight, output_dir):
         os.makedirs(output_dir)
     fn = os.path.join(output_dir, ds + '_FINAL_' + method + '_' + str(weight) + '_Error.png')
     plt.savefig(fn) 
+
+
 for ds in ['MNIST', 'notMNIST', 'CIFAR10']:
     analyze_model(ds, 'L2', 0.01, os.path.join('latex', 'graphs'))
 graph_methods_for_all_datasets(slice(-10,None,1),'TestError', os.path.join('..','latex', 'graphs'))
 graph_methods_for_all_datasets(slice(-10,None,1),'TestCost', os.path.join('..','latex', 'graphs'))         
 
-#generate_tables(os.path.join('..', 'latex', 'tables'), 'TestError')
-#generate_tables(os.path.join('..', 'latex', 'tables'), 'TestCost')
+generate_tables(os.path.join('..', 'latex', 'new_tables'), 'TestError')
+generate_tables(os.path.join('..', 'latex', 'new_tables'), 'TestCost')

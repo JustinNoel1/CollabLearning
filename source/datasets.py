@@ -287,7 +287,7 @@ def randomize(dataset, labels):
     shuffled_labels = labels[permutation] 
     return shuffled_dataset, shuffled_labels
 
-def show_data(images, labels, label_names, title = "Sample Images", estimates = None, num_images = 5, shape = (28,28), 
+def show_data(images, labels, label_names, title = "Sample Images", num_images = 5, shape = (28,28), 
               aug_params = None, output_dir = 'latex/images'):
     """Displays plots of images with their labels.
 
@@ -296,7 +296,6 @@ def show_data(images, labels, label_names, title = "Sample Images", estimates = 
         labels (nparray) : array of labels.
         label_names (dict) : a dictionary between the labels and the corresponding names to be printed
         title (str): title for figure
-        estimages (list): list of predictions
         num_images (int): number of images to show 
         shape (int, int) or (int, int, int): shape of image to show
         distort (bool) : if true include display of distorted images.
