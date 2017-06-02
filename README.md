@@ -11,7 +11,7 @@ The details of our build environment are contained in the `requirements.txt` fil
 To train the models:
 1. Execute 
 `python my_capstone.py`
- from the source directory. This will download the datasets as necessary and train all of the models according to the hardcoded hyperparameters in `my_capstone.py`.
+ from the source directory. This will download the datasets as necessary and train all of the models according to the hardcoded hyperparameters in `my_capstone.py`. Note that at various points this will train some of the ensembles on a severely truncated dataset. This are just tests. If you see some of the models have terrible behavior, but are training extremely fast, this is what is happening.
 1. Take a vacation. (If you are using a CPU, make it a long vacation).
 
 Statistical data, graphs, and checkpoints will be dumped into the `collab_logs` directory. These can be combined into more meaningful graphs by running:
