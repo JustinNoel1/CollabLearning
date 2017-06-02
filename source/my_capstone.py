@@ -117,7 +117,7 @@ def train_single_models(total_images, total_labels, image_shape, test_length, au
 
     #New deep model params
     params['num_times'] = 3 
-    params['filename'] =  base_name + '_single_' + '3_times_'
+    params['filename'] =  base_name + '_single_data_aug' + '3_times_'
     train_model(total_images, total_labels, params)
 
 def train_ensemble_models(total_images, total_labels, image_shape, test_length, aug_params, data_dir, base_name):
@@ -188,7 +188,7 @@ def train_ensemble_models(total_images, total_labels, image_shape, test_length, 
     train_model(total_images, total_labels, params) 
 
 def train_collab_models(total_images, total_labels, image_shape, test_length, aug_params, data_dir, base_name):
-    """Trains a collection of collaborative models according to hardcoded parameters
+    """Trains a collection of collaborative and traditional ensembles according to hardcoded parameters
 
     Args:
         total_images (numpy array): all images including the test set
@@ -227,14 +227,14 @@ def train_collab_models(total_images, total_labels, image_shape, test_length, au
     
     params['data_augmentation'] = None 
     st_params = test_params.copy()
-    st_params['start_filter'] = 2#8 
-    st_params['num_bricks'] = 1#3 
+    st_params['start_filter'] = 8 
+    st_params['num_bricks'] = 3 
     st_params['num_times'] = 1 
 
     medium_params = st_params.copy()
     #New medium model params 
-    medium_params['start_filter'] = 4#16 
-    medium_params['num_bricks'] = 1#3 
+    medium_params['start_filter'] = 16 
+    medium_params['num_bricks'] = 3 
     medium_params['num_times'] = 2 
 
     #Add prefix to prevent overwriting log files 
@@ -249,11 +249,10 @@ def train_collab_models(total_images, total_labels, image_shape, test_length, au
         params['epochs'] = 15 
 
     #Test run with truncated data
-    train_model(total_images, total_labels, params)   
-    return
-    params['collab_method'] = 'cross_ent'
-    params['collab_weight'] = 10. 
-    params['filename'] = base_name + '_collab_' + 'truncated_test_CE_0.1x0'
+    #train_model(total_images, total_labels, params)   
+    params['collab_method'] = 'L2'
+    params['collab_weight'] = 0.1**2 
+    params['filename'] = base_name + '_collab_' + 'truncated_test_L2_0.1x2'
     train_model(total_images, total_labels, params)   
 
     # params['collab_method'] = 'L2'
