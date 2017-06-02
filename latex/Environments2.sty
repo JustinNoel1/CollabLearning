@@ -1,0 +1,234 @@
+%%
+%% theorem and numbering declarations
+%%
+
+%\usepackage{float,subfig}
+\usepackage{float}
+\renewcommand{\theenumi}{\arabic{enumi}}
+\renewcommand{\theenumii}{\textit{\roman{enumii}}}
+\makeatletter
+\renewcommand{\p@enumii}{\theenumi.}
+\makeatother
+
+\numberwithin{equation}{section} %% Comment out for sequentially-numbered
+\numberwithin{figure}{section} %% Comment out for sequentially-numbered
+%Makes equations appear as secno.eqno
+%(This is also accomplished by the numberwithin command)
+%\renewcommand{\theequation}{\thesection.\arabic{equation}}
+%\renewcommand{\figureautorefname}{Figure}
+%\renewcommand{\sectionautorefname}{Section}
+%\renewcommand{\subsectionautorefname}{Section}
+
+%For not including an entry in the table of contents to be used with
+% hyperref. Change the 5 to a 4 otherwise. Write \skipentry the line
+% before the desired section.
+\DeclareRobustCommand{\SkipTocEntry}[5]{}
+\newcommand{\skipentry}{\addtocontents{toc}{\SkipTocEntry}}
+
+\newenvironment{hypothenumerate}%
+{\begin{enumerate}\renewcommand{\theenumi}{\alph{enumi}}}%
+{\end{enumerate}}
+
+\theoremstyle{definition}
+\newtheorem{step}{Step}
+  \newcommand{\stepautorefname}{Step}
+\newtheorem{thm}{Theorem}[section]           % number within section
+  \newcommand{\thmautorefname}{Theorem}      % tell autoref to label as 'Theorem'
+\newtheorem{theorem}{Theorem}[section]           % number within section
+%  \renewcommand*{\theoremautorefname}{Theorem}      % tell autoref to label as 'Theorem'
+\newtheorem*{thm*}{Theorem}
+
+% This makes equations follow the theorem counter
+\makeatletter\let\c@equation\c@thm\makeatother
+% This makes figures follow the theorem counter
+\makeatletter\let\c@figure\c@thm\makeatother
+% This makes subsections follow the theorem counter
+%\makeatletter\let\c@subsection\c@thm\makeatother
+
+\newtheorem{prop}{Proposition}[section]
+  \makeatletter\let\c@prop\c@thm\makeatother % set the counter 'prop' to equal the counter 'thm'
+%  \newcommand{\propautorefname}{Proposition}
+\newtheorem*{prop*}{Proposition}
+
+\newtheorem{claim}{Claim}[section]
+  \makeatletter\let\c@prop\c@thm\makeatother % set the counter 'prop' to equal the counter 'thm'
+  \newcommand{\claimautorefname}{Claim}
+\newtheorem*{claim*}{Claim}
+
+\newtheorem{lem}{Lemma}[section]
+  \makeatletter\let\c@lem\c@thm\makeatother
+%  \newcommand{\lemautorefname}{Lemma}
+
+\newtheorem{lemma}{Lemma}[section]
+  \makeatletter\let\c@lemma\c@thm\makeatother
+  \newcommand{\lemmaautorefname}{Lemma}
+
+\newtheorem{cor}{Corollary}[section]
+  \makeatletter\let\c@cor\c@thm\makeatother
+%  \newcommand{\corautorefname}{Corollary}
+\newtheorem*{cor*}{Corollary}
+
+\newtheorem{corollary}{Corollary}[section]
+  \makeatletter\let\c@corollary\c@thm\makeatother
+  \newcommand{\corollaryautorefname}{Corollary}
+
+\newtheorem*{corollary*}{Corollary}
+
+\newtheorem{conj}{Conjecture}[section]
+  \makeatletter\let\c@conj\c@thm\makeatother
+  \newcommand{\conjautorefname}{Conjecture}
+
+\newtheorem{conjecture}{Conjecture}[section]
+  \makeatletter\let\c@conjecture\c@thm\makeatother
+%  \newcommand{\conjectureautorefname}{Conjecture}
+
+\newtheorem{observation}{Observation}[section]
+  \makeatletter\let\c@observation\c@thm\makeatother
+%  \newcommand{\observationautorefname}{Observation}
+
+\newtheorem{ques}{Question}[section]
+  \makeatletter\let\c@ques\c@thm\makeatother
+%  \newcommand{\quesautorefname}{Question}
+
+\newtheorem{question}{Question}[section]
+  \makeatletter\let\c@question\c@thm\makeatother
+\newtheorem{problem}{Problem}[section]
+  \makeatletter\let\c@problem\c@thm\makeatother
+%  \newcommand{\questionautorefname}{Question}
+
+\newtheorem*{question*}{Question}
+
+\newtheorem{partialanswer}{Partial Answer}[section]
+  \makeatletter\let\c@partialanswer\c@thm\makeatother
+%  \newcommand{\partialanswerautorefname}{Partial Answer}
+
+\newtheorem{assumption}{Assumption}[section]
+  \makeatletter\let\c@assumption\c@thm\makeatother
+  \newcommand{\assumptionautorefname}{Assumption}
+\newtheorem{ass}{Potentially Foolish Assumption}[section]
+  \makeatletter\let\c@ass\c@thm\makeatother
+  \newcommand{\assautorefname}{Potentially Foolish Assumption}
+
+\newtheorem{axiom}{Axiom}[section]
+  \makeatletter\let\c@axiom\c@thm\makeatother
+  \newcommand{\axiomautorefname}{Axiom}
+  \newtheorem*{axiom*}{Axiom}
+
+\theoremstyle{definition}
+\newtheorem{defn}{Definition}[section]
+  \makeatletter\let\c@defn\c@thm\makeatother
+  \newcommand{\defnautorefname}{Definition}
+\newtheorem{definition}{Definition}[section]
+  \makeatletter\let\c@definition\c@thm\makeatother
+  \newcommand{\definitionautorefname}{Definition}
+
+\newtheorem{notation}{Notation}[section]
+  \makeatletter\let\c@notation\c@thm\makeatother
+  \newcommand{\notationautorefname}{Notation}
+  \newtheorem*{notation*}{Notation}
+
+\newtheorem{notations}{Notations}[section]
+  \makeatletter\let\c@notations\c@thm\makeatother
+  \newcommand{\notationsautorefname}{Notations}
+
+\newtheorem{hyp}{Hypothesis}[section]
+  \makeatletter\let\c@hyp\c@thm\makeatother
+  \newcommand{\hypautorefname}{Hypothesis}
+
+\newtheorem{idea}{Idea}[section]
+  \makeatletter\let\c@idea\c@thm\makeatother
+  \newcommand{\ideaautorefname}{Idea}
+
+\newtheorem{term}{Terminology}[section]
+  \makeatletter\let\c@term\c@thm\makeatother
+  \newcommand{\termautorefname}{Terminology}
+
+\newtheorem{con}{Construction}[section]
+  \makeatletter\let\c@con\c@thm\makeatother
+  \newcommand{\conautorefname}{Construction}
+
+\newtheorem{Xeg}{Counterexample}[section]
+  \makeatletter\let\c@Xeg\c@thm\makeatother
+  \newcommand{\Xegautorefname}{Counterexample}
+
+\newtheorem{eg}{Example}[section]
+  \makeatletter\let\c@eg\c@thm\makeatother
+  \newcommand{\egautorefname}{Example}
+\newtheorem*{eg*}{Example}
+
+\newtheorem{egs}{Examples}[section]
+  \makeatletter\let\c@egs\c@thm\makeatother
+  \newcommand{\egsautorefname}{Examples}
+
+\newtheorem{nonexample}{Non-example}[section]
+  \makeatletter\let\c@nonexample\c@thm\makeatother
+  \newcommand{\nonexampleautorefname}{Non-example}
+  
+\newtheorem{example}{Example}[section]
+  \makeatletter\let\c@example\c@thm\makeatother
+  \newcommand{\exampleautorefname}{Example}
+
+\newtheorem{examples}{Examples}[section]
+  \makeatletter\let\c@examples\c@thm\makeatother
+  \newcommand{\examplesautorefname}{Examples}
+
+\newtheorem*{example*}{Example}
+
+\newtheorem{ex}{Exercise}[section]
+  \makeatletter\let\c@ex\c@thm\makeatother
+  \newcommand{\exautorefname}{Exercise}
+
+\newtheorem{remark}{Remark}[section]
+  \makeatletter\let\c@remark\c@thm\makeatother
+\newcommand{\remarkautorefname}{Remark}
+
+\newtheorem{warning}{Warning}[section]
+  \makeatletter\let\c@warning\c@thm\makeatother
+\newcommand{\warningautorefname}{Warning}
+
+\newtheorem{war}{Warning}[section]
+  \makeatletter\let\c@war\c@thm\makeatother
+\newcommand{\warautorefname}{Warning}
+
+\newtheorem{rmk}{Remark}[section]
+  \makeatletter\let\c@rmk\c@thm\makeatother
+  \newcommand{\rmkautorefname}{Remark}
+
+\newtheorem{rem}{Remark}[section]
+  \makeatletter\let\c@rem\c@thm\makeatother
+\newcommand{\remautorefname}{Remark}
+
+\newtheorem*{rem*}{Remark}
+
+\newtheorem{rmks}{Remarks}[section]
+  \makeatletter\let\c@rmks\c@thm\makeatother
+  \newcommand{\rmksautorefname}{Remarks}
+
+
+
+ %  Remark style
+\theoremstyle{remark}
+\newtheorem{exer}{Exercise}[section]
+  \makeatletter\let\c@exer\c@thm\makeatother
+  \newcommand{\exerautorefname}{Exercise}
+
+\newtheorem{warn}{Warning}[section]
+  \makeatletter\let\c@warn\c@thm\makeatother
+  \newcommand{\warnautorefname}{Warning}
+
+\newtheorem*{note}{Note}
+%
+%\newfloat{diagram}{H}{lom}
+%\floatname{diagram}{Diagram}
+%\newsubfloat{diagram}
+%\newcommand{\diagramautorefname}{Diagram}
+%\renewcommand{\theHdiagram}{\arabic{diagram}}
+%\newcommand{\subdiagramautorefname}{Diagram}
+
+%Extend autoref for subfloats
+% \usepackage{xspace}
+% \usepackage{ifthen}
+% \makeatletter
+% \let\@myautoref=\autoref
+% \renewcommand*{\autoref}[2][]{\ifthenelse{\equal{#1}{}}{\@myautoref{#2}}{\hyperref[#1]{\begin{NoHyper}\@myautoref{#2}\subref{#1}\end{NoHyper}}}\xspace}
+% \makeatother

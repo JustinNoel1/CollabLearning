@@ -1,0 +1,509 @@
+\usepackage{mathrsfs}
+\usepackage{stmaryrd}
+
+\DeclareFontFamily{OT1}{pzc}{}
+\DeclareFontShape{OT1}{pzc}{m}{it}{<-> s * [1.170] pzcmi7t}{}  % scale font
+\DeclareMathAlphabet{\mathpzc}{OT1}{pzc}{m}{it}
+\newcommand{\mpz}{\mathpzc}
+
+\DeclareMathOperator{\Hom}{Hom}
+\DeclareMathOperator{\proj}{Proj}
+\DeclareMathOperator{\ext}{Ext}
+\DeclareMathOperator{\Ext}{Ext}
+\DeclareMathOperator{\Der}{Der}
+\DeclareMathOperator{\tor}{Tor}
+\DeclareMathOperator{\Tor}{Tor}
+\DeclareMathOperator{\thh}{THH}
+\DeclareMathOperator{\coext}{Coext}
+\DeclareMathOperator{\cotor}{Cotor}
+\DeclareMathOperator{\coeq}{coeq}
+\DeclareMathOperator{\eq}{eq}
+\DeclareMathOperator{\spec}{Spec}
+\DeclareMathOperator{\pspec}{Spec_*}
+\DeclareMathOperator{\sch}{Sch}
+\DeclareMathOperator{\spf}{Spf}
+\DeclareMathOperator{\nat}{Nat}
+\DeclareMathOperator{\coker}{\mathrm{coker}}
+\DeclareMathOperator{\img}{im}
+\DeclareMathOperator{\cok}{\mathrm{Coker}}
+\DeclareMathOperator{\Coker}{\mathrm{Coker}}
+
+\DeclareMathOperator{\Mod}{\mathpzc{Mod}\,}
+\DeclareMathOperator{\dMod}{\mathpzc{\text{-}Mod}\,}
+\DeclareMathOperator{\desc}{\mathpzc{Desc}\,}
+\DeclareMathOperator{\Sym}{\mathpzc{Sym}\,}
+\DeclareMathOperator{\Ind}{\mathrm{Ind}\,}
+\DeclareMathOperator{\alg}{\mathpzc{\text{-}alg}\,}
+\DeclareMathOperator{\dalg}{\mathpzc{\text{-}alg}\,}
+
+\DeclareMathOperator{\Tot}{Tot\,}
+\DeclareMathOperator{\End}{End\,}
+\DeclareMathOperator{\Aut}{Aut}
+\DeclareMathOperator{\Ho}{Ho}
+\newcommand{\ho}{\textit{ho}}
+\newcommand{\h}{\textit{h}}
+
+%use this command if you want a space to be put after a macro when it
+% should be there use zspace if you want a space to be put after a macro
+% at the appropriate time AND you want a little space if the next
+% character is a '(' for example if the hom spacing looks a little weird
+\DeclareRobustCommand\xspace{\futurelet\@let@token\@xspace}
+ \def\@xspace{%
+ \ifx\@let@token\bgroup\else
+ \ifx\@let@token\egroup\else
+ \ifx\@let@token\/\else
+ \ifx\@let@token\ \else
+ \ifx\@let@token~\else
+ \ifx\@let@token.\else
+ \ifx\@let@token!\else
+ \ifx\@let@token,\else
+ \ifx\@let@token:\else
+ \ifx\@let@token;\else
+ \ifx\@let@token?\else
+ \ifx\@let@token/\else
+ \ifx\@let@token'\else
+ \ifx\@let@token)\else
+ \ifx\@let@token-\else
+ \ifx\@let@token$\else
+ \ifx\@let@token\@xobeysp\else
+ \ifx\@let@token\space\else
+ \ifx\@let@token\@sptoken\else
+ \space
+ \fi\fi\fi\fi\fi\fi\fi\fi\fi\fi\fi\fi\fi\fi\fi\fi\fi\fi\fi}
+
+\DeclareRobustCommand\zspace{\futurelet\@let@token\@zspace}
+ \def\@zspace{%
+ \ifx\@let@token\bgroup\else
+ \ifx\@let@token\egroup\else
+ \ifx\@let@token\/\else
+ \ifx\@let@token\ \else
+ \ifx\@let@token~\else
+ \ifx\@let@token.\else
+ \ifx\@let@token!\else
+ \ifx\@let@token,\else
+ \ifx\@let@token:\else
+ \ifx\@let@token;\else
+ \ifx\@let@token?\else
+ \ifx\@let@token/\else
+ \ifx\@let@token'\else
+ \ifx\@let@token)\else
+ \ifx\@let@token$\else
+ \ifx\@let@token( \,\else
+ \ifx\@let@token-\else
+ \ifx\@let@token\@xobeysp\else
+ \ifx\@let@token\space\else
+ \ifx\@let@token\@sptoken\else
+ \space
+ \fi\fi\fi\fi\fi\fi\fi\fi\fi\fi\fi\fi\fi\fi\fi\fi\fi\fi\fi\fi}
+
+%For categories 
+\newcommand{\category}[1]{\ensuremath{\mathpzc{#1}}\xspace}
+%For categories with a non-formatted precursor e.g. G-spaces
+\newcommand{\lcategory}[2]{\ensuremath{#1\text{-}\mathpzc{#2}}\xspace}
+
+%For categories with non-formatted precursor and postcursor
+\newcommand{\dcategory}[2]{\ensuremath{#1\text{-}#2}\xspace}
+%For categories with a non-formatted subscript
+\newcommand{\subcategory}[2]{\ensuremath{\mathpzc{#1}_{#2}}\xspace}
+%For categories with a non-formatted superscript
+\newcommand{\supcategory}[2]{\ensuremath{\mathpzc{#1}^{#2}}\xspace}
+%Pointed categories
+\newcommand{\pcategory}[1]{\subcategory{#1}{*}}
+%Simplicial categories (In case we want to change conventions)
+\newcommand{\scategory}[1]{\category{s#1}}
+\newcommand{\pscategory}[1]{\pcategory{s#1}}
+\newcommand{\ssubcategory}[2]{\subcategory{s#1}{#2}}
+\newcommand{\ssupcategory}[2]{\supcategory{s#1}{#2}}
+\newcommand{\slcategory}[2]{\ensuremath{#1\text{-}\mathpzc{s#2}}\xspace}
+
+\newcommand{\badcategory}[1]{\ensuremath{\mathpzc{#1}}\zspace}
+\newcommand{\badscategory}[1]{\badcategory{s#1}}
+
+\newcommand{\Cat}{\category{Cat}}
+\newcommand{\sCat}{\mathpzc{Cat}_{\Delta}\xspace}
+
+\newcommand{\Set}{\category{Set}}
+\newcommand{\sSet}{\scategory{Set}}
+\newcommand{\psset}{\pscategory{Set}}
+
+\newcommand{\FinSet}{\category{FinSet}}
+\newcommand{\pFinSet}{\pcategory{FinSet}}
+
+\newcommand{\Top}{\badcategory{Top}}
+\newcommand{\hTop}{\badcategory{hTop}}
+\newcommand{\pTop}{\pcategory{Top}}
+\newcommand{\hpTop}{\pcategory{hTop}}
+
+\newcommand{\Group}{\badcategory{Group}}
+\newcommand{\sGroup}{\badscategory{Group}}
+
+\newcommand{\AbGroup}{\badcategory{AbGroup}}
+\newcommand{\sAbGroup}{\badscategory{AbGroup}}
+
+\newcommand{\RMod}{\subcategory{Mod}{R}}
+\newcommand{\QMod}{\subcategory{Mod}{\mathbb{Q}}}
+\newcommand{\SMod}{\subcategory{Mod}{S}}
+\newcommand{\kMod}{\subcategory{Mod}{k}}
+\newcommand{\HkMod}{\subcategory{Mod}{Hk}}
+\newcommand{\HfpbarMod}{\subcategory{Mod}{H\overline{\mathbb{F}}_p}}
+\newcommand{\HQMod}{\subcategory{Mod}{H\mathbb{Q}}}
+\newcommand{\HoHkMod}{\subcategory{HoMod}{Hk}}
+\newcommand{\EnHk}{\dcategory{E_n}{\HkMod}}
+\newcommand{\EinftyS}{\dcategory{E_\infty}{\SMod}}
+\newcommand{\EinftyHk}{\dcategory{E_\infty}{\HkMod}}
+\newcommand{\sEinftyHk}{\dcategory{sE_\infty}{\HkMod}}
+\newcommand{\EinftyHfpbar}{\dcategory{E_\infty}{\HfpbarMod}}
+\newcommand{\EinftyHQ}{\dcategory{E_\infty}{\HQMod}}
+\newcommand{\Hinftyk}{\dcategory{H_\infty}{\HkMod}}
+\newcommand{\Hnk}{\dcategory{H_n}{\HkMod}}
+\newcommand{\sHkMod}{\ssubcategory{Mod}{Hk}}
+\newcommand{\sRMod}{\ssubcategory{Mod}{R}}
+\newcommand{\sSMod}{\ssubcategory{Mod}{S}}
+
+\newcommand{\Ring}{\category{Ring}}
+\newcommand{\sRing}{\scategory{Ring}}
+
+\newcommand{\Ass}{\badcategory{AssAlg}}
+\newcommand{\sAss}{\sbadcategory{AssAlg}}
+
+\newcommand{\Comm}{\badcategory{CommAlg}}
+\newcommand{\CommAlg}{\badcategory{CommAlg}}
+\newcommand{\sComm}{\sbadcategory{CommAlg}}
+
+\newcommand{\Lie}{\badcategory{Lie}}
+\newcommand{\sLie}{\sbadcategory{Lie}}
+
+\newcommand{\Cn}{\supcategory{C}{n}}
+\newcommand{\sCn}{\ssupcategory{C}{n}}
+
+\newcommand{\Cinf}{\supcategory{C}{\infty}}
+\newcommand{\sCinf}{\ssupcategory{C}{\infty}}
+
+\newcommand{\GammaSpace}{\lcategory{\Gamma}{Top}}
+
+\newcommand{\Spectra}{\category{Spectra}}
+
+\newcommand{\Tring}{\category{TRing}}
+
+\newcommand{\Mon}{\category{Monoid}}
+\newcommand{\sMon}{\scategory{Monoid}}
+
+\newcommand{\Presheaf}{\category{Presheaf}}
+\newcommand{\sPresheaf}{\scategory{Presheaf}}
+\newcommand{\Sheaf}{\category{Sheaf}}
+\newcommand{\sSheaf}{\scategory{Sheaf}}
+
+\newcommand{\Gset}{\lcategory{G}{Set}}
+\newcommand{\Hset}{\lcategory{H}{Set}}
+\newcommand{\sGset}{\slcategory{G}{Set}}
+\newcommand{\sHset}{\slcategory{H}{Set}}
+
+\newcommand{\Gspace}{\lcategory{G}{Top}}
+\newcommand{\GTop}{\lcategory{G}{Top}}
+\newcommand{\Hspace}{\lcategory{H}{Top}}
+\newcommand{\HTop}{\lcategory{H}{Top}}
+\newcommand{\sGspace}{\slcategory{G}{Top}}
+\newcommand{\sHspace}{\slcategory{H}{Top}}
+
+\newcommand{\kAlg}{\lcategory{k}{Alg}}
+\newcommand{\kPAlg}{\lcategory{k}{PAlg}}
+\newcommand{\skPAlg}{\slcategory{k}{PAlg}}
+\newcommand{\CommkAlg}{\lcategory{k}{CAlg}}
+\newcommand{\CommQAlg}{\lcategory{\bQ}{CAlg}}
+\newcommand{\HkAlg}{\lcategory{Hk}{Alg}}
+\newcommand{\HoHkAlg}{\mathrm{ho}\lcategory{Hk}{Alg}}
+\newcommand{\sHkAlg}{\slcategory{Hk}{Alg}}
+\newcommand{\HoOAlg}{\lcategory{H_*\sO}{Alg}}
+\newcommand{\sHoOAlg}{\lcategory{sH_*\sO}{Alg}}
+\newcommand{\HQAlg}{\lcategory{H\bQ}{Alg}}
+\newcommand{\CommHkAlg}{\lcategory{Hk}{CAlg}}
+\newcommand{\CommHQAlg}{\lcategory{H\bQ}{CAlg}}
+
+\newcommand{\Augkalg}{\mathpzc{Aug}\text{--}\mathpzc{alg}\,}
+\newcommand{\DGMod}{\mathpzc{DG}\text{--}\mathpzc{Mod}\,}
+\newcommand{\hDGMod}{\mathpzc{hDG}\text{--}\mathpzc{Mod}\,}
+\newcommand{\CDGA}{\category{CDGA}}
+\newcommand{\hCDGA}{\category{hCDGA}}
+
+\newcommand{\hLoop}{\mathpzc{h}\Omega\text{--}\badcategory{Top}}
+\newcommand{\Loop}{\Omega\text{--}\badcategory{Top}}
+\newcommand{\HSp}{H\text{--}\badcategory{Sp}}
+\newcommand{\Scheme}{\category{Scheme}}
+
+\newcommand{\pscheme}{\pcategory{Scheme}}
+
+\newcommand{\grpscheme}{\category{GrpSch}}
+
+\newcommand{\fgrpscheme}{\category{GrpSch}}
+
+\newcommand{\fscheme}{\category{FSch}}
+\newcommand{\pfscheme}{\pcategory{FSch}}
+
+\newcommand{\fgp}{\category{FGp}}
+
+\newcommand{\cfscheme}{\category{CFSch}}
+\newcommand{\base}{\category{Based}}
+\newcommand{\semi}{\category{SemiGp}}
+\newcommand{\rng}{\category{Rng}}
+\newcommand{\rig}{\category{Rig}}
+\newcommand{\dash}{\text{--}}
+
+%Some paper specific macros
+\newcommand{\dualwitt}{\widehat{\mathbb{W}}}
+\newcommand{\fg}{\widehat{\mathbb{G}}}
+\newcommand{\fline}{\widehat{\mathbb{A}}^1}
+
+\newcommand{\id}{\text{id}}
+\newcommand{\cn}{\colon}
+\newcommand{\mada}{\text{-}}
+\newcommand{\tdash}{\text{-}}
+\newcommand{\fto}{\xrightarrow}
+\newcommand{\ladj}{\dashv}  % -| = "is left adjoint to"
+\newcommand{\radj}{\vdash}  % |- = "is right adjoint to"
+\newcommand{\bul}{\bullet}
+\newcommand{\wre}{{\textstyle \int}}
+
+\newcommand{\epz}{\varepsilon}
+\newcommand{\xym}{\xymatrix}
+
+% Caligraphic letters c followed by capital letter
+\newcommand{\cA}{\ensuremath{\mathcal{A}}\xspace}
+\newcommand{\cB}{\ensuremath{\mathcal{B}}\xspace}
+\newcommand{\cC}{\ensuremath{\mathcal{C}}\xspace}
+\newcommand{\cD}{\ensuremath{\mathcal{D}}\xspace}
+\newcommand{\cE}{\ensuremath{\mathcal{E}}\xspace}
+\newcommand{\cF}{\ensuremath{\mathcal{F}}\xspace}
+\newcommand{\cG}{\ensuremath{\mathcal{G}}\xspace}
+\newcommand{\cH}{\ensuremath{\mathcal{H}}\xspace}
+\newcommand{\cI}{\ensuremath{\mathcal{I}}\xspace}
+\newcommand{\cJ}{\ensuremath{\mathcal{J}}\xspace}
+\newcommand{\cK}{\ensuremath{\mathcal{K}}\xspace}
+\newcommand{\cL}{\ensuremath{\mathcal{L}}\xspace}
+\newcommand{\cM}{\ensuremath{\mathcal{M}}\xspace}
+\newcommand{\cN}{\ensuremath{\mathcal{N}}\xspace}
+\newcommand{\cO}{\ensuremath{\mathcal{O}}\xspace}
+\newcommand{\cP}{\ensuremath{\mathcal{P}}\xspace}
+\newcommand{\cQ}{\ensuremath{\mathcal{Q}}\xspace}
+\newcommand{\cR}{\ensuremath{\mathcal{R}}\xspace}
+\newcommand{\cS}{\ensuremath{\mathcal{S}}\xspace}
+\newcommand{\cT}{\ensuremath{\mathcal{T}}\xspace}
+\newcommand{\cU}{\ensuremath{\mathcal{U}}\xspace}
+\newcommand{\cV}{\ensuremath{\mathcal{V}}\xspace}
+\newcommand{\cW}{\ensuremath{\mathcal{W}}\xspace}
+\newcommand{\cX}{\ensuremath{\mathcal{X}}\xspace}
+\newcommand{\cY}{\ensuremath{\mathcal{Y}}\xspace}
+\newcommand{\cZ}{\ensuremath{\mathcal{Z}}\xspace}
+
+% less fancy script letters  small sc then capital letter
+\newcommand{\scA}{\ensuremath{\mathpzc{A}}\xspace}
+\newcommand{\scB}{\ensuremath{\mathpzc{B}}\xspace}
+\newcommand{\scC}{\ensuremath{\mathpzc{C}}\xspace}
+\newcommand{\scD}{\ensuremath{\mathpzc{D}}\xspace}
+\newcommand{\scE}{\ensuremath{\mathpzc{E}}\xspace}
+\newcommand{\scF}{\ensuremath{\mathpzc{F}}\xspace}
+\newcommand{\scG}{\ensuremath{\mathpzc{G}}\xspace}
+\newcommand{\scH}{\ensuremath{\mathpzc{H}}\xspace}
+\newcommand{\scI}{\ensuremath{\mathpzc{I}}\xspace}
+\newcommand{\scJ}{\ensuremath{\mathpzc{J}}\xspace}
+\newcommand{\scK}{\ensuremath{\mathpzc{K}}\xspace}
+\newcommand{\scL}{\ensuremath{\mathpzc{L}}\xspace}
+\newcommand{\scM}{\ensuremath{\mathpzc{M}}\xspace}
+\newcommand{\scN}{\ensuremath{\mathpzc{N}}\xspace}
+\newcommand{\scO}{\ensuremath{\mathpzc{O}}\xspace}
+\newcommand{\scP}{\ensuremath{\mathpzc{P}}\xspace}
+\newcommand{\scQ}{\ensuremath{\mathpzc{Q}}\xspace}
+\newcommand{\scR}{\ensuremath{\mathpzc{R}}\xspace}
+\newcommand{\scS}{\ensuremath{\mathpzc{S}}\xspace}
+\newcommand{\scT}{\ensuremath{\mathpzc{T}}\xspace}
+\newcommand{\scU}{\ensuremath{\mathpzc{U}}\xspace}
+\newcommand{\scV}{\ensuremath{\mathpzc{V}}\xspace}
+\newcommand{\scW}{\ensuremath{\mathpzc{W}}\xspace}
+\newcommand{\scX}{\ensuremath{\mathpzc{X}}\xspace}
+\newcommand{\scY}{\ensuremath{\mathpzc{Y}}\xspace}
+\newcommand{\scZ}{\ensuremath{\mathpzc{Z}}\xspace}
+
+% fancy script letters  small s then capital letter
+\newcommand{\sA}{\scr{A}}
+\newcommand{\sB}{\scr{B}}
+\newcommand{\sC}{\scr{C}}
+\newcommand{\sD}{\scr{D}}
+\newcommand{\sE}{\scr{E}}
+\newcommand{\sF}{\scr{F}}
+\newcommand{\sG}{\scr{G}}
+\newcommand{\sH}{\scr{H}}
+\newcommand{\sI}{\scr{I}}
+\newcommand{\sJ}{\scr{J}}
+\newcommand{\sK}{\scr{K}}
+\newcommand{\sL}{\scr{L}}
+\newcommand{\sM}{\scr{M}}
+\newcommand{\sN}{\scr{N}}
+\newcommand{\sO}{\scr{O}}
+\newcommand{\sP}{\scr{P}}
+\newcommand{\sQ}{\scr{Q}}
+\newcommand{\sR}{\scr{R}}
+\newcommand{\sS}{\scr{S}}
+\newcommand{\sT}{\scr{T}}
+\newcommand{\sU}{\scr{U}}
+\newcommand{\sV}{\scr{V}}
+\newcommand{\sW}{\scr{W}}
+\newcommand{\sX}{\scr{X}}
+\newcommand{\sY}{\scr{Y}}
+\newcommand{\sZ}{\scr{Z}}
+
+% blackboard bold letters
+\newcommand{\bA}{\mathbb{A}}
+\newcommand{\bB}{\mathbb{B}}
+\newcommand{\bC}{\mathbb{C}}
+\newcommand{\bD}{\mathbb{D}}
+\newcommand{\bE}{\mathbb{E}}
+\newcommand{\bF}{\mathbb{F}}
+\newcommand{\bG}{\mathbb{G}}
+\newcommand{\bH}{\mathbb{H}}
+\newcommand{\bI}{\mathbb{I}}
+\newcommand{\bJ}{\mathbb{J}}
+\newcommand{\bK}{\mathbb{K}}
+\newcommand{\bL}{\mathbb{L}}
+\newcommand{\bM}{\mathbb{M}}
+\newcommand{\bN}{\mathbb{N}}
+\newcommand{\bO}{\mathbb{O}}
+\newcommand{\bP}{\mathbb{P}}
+\newcommand{\bQ}{\mathbb{Q}}
+\newcommand{\bR}{\mathbb{R}}
+\newcommand{\bS}{\mathbb{S}}
+\newcommand{\bT}{\mathbb{T}}
+\newcommand{\bU}{\mathbb{U}}
+\newcommand{\bV}{\mathbb{V}}
+\newcommand{\bW}{\mathbb{W}}
+\newcommand{\bX}{\mathbb{X}}
+\newcommand{\bY}{\mathbb{Y}}
+\newcommand{\bZ}{\mathbb{Z}}
+
+\newcommand{\mfa}{\mathfrak{a}}
+\newcommand{\mfb}{\mathfrak{b}}
+\newcommand{\mfc}{\mathfrak{c}}
+\newcommand{\mfd}{\mathfrak{d}}
+\newcommand{\mfe}{\mathfrak{e}}
+\newcommand{\mff}{\mathfrak{f}}
+\newcommand{\mfg}{\mathfrak{g}}
+\newcommand{\mfh}{\mathfrak{h}}
+\newcommand{\mfi}{\mathfrak{i}}
+\newcommand{\mfk}{\mathfrak{k}}
+\newcommand{\mfl}{\mathfrak{l}}
+\newcommand{\mfm}{\mathfrak{m}}
+\newcommand{\mfn}{\mathfrak{n}}
+\newcommand{\mfo}{\mathfrak{o}}
+\newcommand{\mfp}{\mathfrak{p}}
+\newcommand{\mfq}{\mathfrak{q}}
+\newcommand{\mfs}{\mathfrak{s}}
+\newcommand{\mft}{\mathfrak{t}}
+\newcommand{\mfu}{\mathfrak{u}}
+\newcommand{\mfv}{\mathfrak{v}}
+\newcommand{\mfx}{\mathfrak{x}}
+\newcommand{\mfy}{\mathfrak{y}}
+\newcommand{\mfz}{\mathfrak{z}}
+%%The * Makes the operator subscript like lim
+\DeclareMathOperator*{\colim}{colim}
+\DeclareMathOperator*{\holim}{holim}
+\DeclareMathOperator*{\hocolim}{hocolim}
+\DeclareMathOperator*{\ind}{Ind}
+\DeclareMathOperator*{\pro}{Pro}
+\DeclareMathOperator*{\plim}{``lim''}
+\DeclareMathOperator*{\ilim}{``colim''}
+
+\newcommand{\sk}{\ensuremath{\mathrm{sk}}}
+%Special dashes in mathmode
+\newcommand{\mendash}{\text{\textendash}}
+\newcommand{\memdash}{\text{\textemdash}}
+
+% Prettyref definitions
+% \usepackage{prettyref}
+% \newrefformat{lem}{Lemma \ref{#1}}
+% \newrefformat{step}{Step \ref{#1}}
+% \newrefformat{fig}{Figure \ref{#1}}
+% \newrefformat{thm}{Theorem \ref{#1}}
+% \newrefformat{tab}{Table \ref{#1}}
+% \newrefformat{eq}{Equation \ref{#1}}
+% \newrefformat{def}{Definition \ref{#1}}
+% \newrefformat{ch}{Chapter \ref{#1}}
+% \newrefformat{sec}{Section \ref{#1}}
+% \newrefformat{sub}{Section \ref{#1}}
+% \newrefformat{pro}{Proposition \ref{#1}}
+% \newrefformat{prop}{Proposition \ref{#1}}
+% \newrefformat{cas}{Case \ref{#1}}
+% \newrefformat{rem}{Remark \ref{#1}}
+% \newrefformat{exa}{Example \ref{#1}}
+% \newrefformat{cor}{Corollary \ref{#1}}
+% \newrefformat{enum}{(\ref{#1})}
+% \newrefformat{obs}{Observation \ref{#1}}
+% \newrefformat{conj}{Conjecture \ref{#1}}
+% \newrefformat{con}{Construction \ref{#1}}
+%
+\newcommand{\op}{\mathrm{op}}
+\newcommand{\ab}{\mathrm{ab}}
+\newcommand{\Ab}{\mathrm{Ab}}
+\newcommand{\Gp}{\mathrm{Gp}}
+\newcommand{\Sing}{\mathrm{Sing}}
+\newcommand{\Ex}{\mathrm{Ex}}
+\newcommand{\Id}{\mathrm{Id}}
+
+\newcommand{\nil}{\mathrm{Nil}}
+\newcommand{\symm}{\mathrm{Sym}}
+\newcommand{\sym}{\mathrm{symm}}
+\newcommand{\divc}{\mathrm{Div}}
+\newcommand{\bcoalg}{\mathpzc{BCoAlg}}
+
+\newcommand{\spl}{\mathrm{Split}}
+\newcommand{\rspl}{\mathrm{rSplit}}
+
+%%Arrows
+\newcommand{\ra}{\rightarrow}
+\newcommand{\xra}{\xrightarrow}
+\newcommand{\la}{\leftarrow}
+\newcommand{\xla}{\xleftarrow}
+
+%% xymatrix
+\newcommand{\xymat}{\UseComputerModernTips \xymatrix}
+
+%% blackboard bold letters
+\newcommand{\bbA}{\mathbb{A}}
+\newcommand{\hatA}{\widehat{\mathbb{A}}}
+\newcommand{\bbC}{\mathbb{C}}
+\newcommand{\bbG}{\mathbb{G}}
+\newcommand{\bbN}{\mathbb{N}}
+\newcommand{\bbQ}{\mathbb{Q}}
+\newcommand{\bbR}{\mathbb{R}}
+\newcommand{\bbS}{\mathbb{S}}
+\newcommand{\bbW}{\mathbb{W}}
+\newcommand{\bbZ}{\mathbb{Z}}
+
+%% relations
+\newcommand{\hty}{\simeq}
+\newcommand{\iso}{\cong}
+
+%% binary operators
+\newcommand{\sma}{\wedge}
+\newcommand{\wed}{\vee}
+
+\newcommand*{\ei}{\ensuremath{E_{\infty}}}
+\newcommand*{\hi}{\ensuremath{H_{\infty}}}
+\newcommand*{\padic}{\ensuremath{\mathbb{Z}_{p}}}
+\newcommand*{\qpadic}{\ensuremath{\mathbb{Q}_{p}}}
+\newcommand*{\ploc}{\ensuremath{\mathbb{Z}_{(p)}}}
+\newcommand*{\Fp}{\ensuremath{\mathbb{F}_{p}}}
+\newcommand*{\zmodp}{\ensuremath{\mathbb{Z}/p}}
+\newcommand*{\cp}[1]{\mathbb{C}P^{#1}}
+\newcommand*{\cpn}{\cp{n}}
+\newcommand*{\cpinf}{\cp{\infty}}
+\newcommand{\wt}[1]{\widetilde{#1}}
+\newcommand{\wtG}{\widetilde{\Gamma}}
+\newcommand{\wtD}{\widetilde{D}}
+
+
+%%Typographical commands
+\newcommand{\lc}{l.c.}
+\newcommand{\ie}{i.e., }
+%% better marginpar
+%\setlength{\marginparwidth}{.65in}
+% \let\oldmarginpar\marginpar
+% \renewcommand\marginpar[1]{\-\oldmarginpar%[\raggedleft\footnotesize #1]%
+% {\raggedright\small #1}}
