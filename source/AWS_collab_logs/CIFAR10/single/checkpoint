@@ -1,0 +1,5 @@
+model_checkpoint_path: "CIFAR10_single_data_augdeep-40-0.1583.ckpt"
+all_model_checkpoint_paths: "CIFAR10_single_data_augdeep-10-0.3028.ckpt"
+all_model_checkpoint_paths: "CIFAR10_single_data_augdeep-20-0.2449.ckpt"
+all_model_checkpoint_paths: "CIFAR10_single_data_augdeep-30-0.1734.ckpt"
+all_model_checkpoint_paths: "CIFAR10_single_data_augdeep-40-0.1583.ckpt"
