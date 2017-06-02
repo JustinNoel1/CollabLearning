@@ -13,7 +13,7 @@ def build_dataframe(dataset):
     """
     import os
     #directory for pickles
-    pickle_pantry = 'AWS8/collab_logs/'+dataset+'/collab/'
+    pickle_pantry = os.path.join('AWS_collab_logs',dataset,'collab')
 
     #build column headers
     models = ['ST', 'M', 'Ens']
@@ -222,8 +222,8 @@ def analyze_model(ds, method, weight, output_dir):
     plt.savefig(fn) 
 for ds in ['MNIST', 'notMNIST', 'CIFAR10']:
     analyze_model(ds, 'L2', 0.01, os.path.join('latex', 'graphs'))
-graph_methods_for_all_datasets(slice(-10,None,1),'TestError', os.path.join('latex', 'graphs'))          
-graph_methods_for_all_datasets(slice(-10,None,1),'TestCost', os.path.join('latex', 'graphs'))          
+graph_methods_for_all_datasets(slice(-10,None,1),'TestError', os.path.join('..','latex', 'graphs'))
+graph_methods_for_all_datasets(slice(-10,None,1),'TestCost', os.path.join('..','latex', 'graphs'))         
 
-#generate_tables(os.path.join('latex', 'tables'), 'TestError')
-#generate_tables(os.path.join('latex', 'tables'), 'TestCost')
+#generate_tables(os.path.join('..', 'latex', 'tables'), 'TestError')
+#generate_tables(os.path.join('..', 'latex', 'tables'), 'TestCost')

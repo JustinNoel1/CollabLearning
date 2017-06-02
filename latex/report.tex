@@ -1,4 +1,4 @@
-\documentclass[english,a4paper]{amsart}
+\documentclass[english,a4paper,oneside]{amsart}
 
 \newcommand{\scr}[1]{\mathscr{#1}}
 \usepackage{hyperref}
@@ -319,25 +319,27 @@ Below we will evaluate the models by examining the average value of their respec
 We will base our analysis on 3 publicly available datasets: the MNIST,  notMNIST, and CIFAR10 datasets. 
 
 \subsubsection{MNIST Dataset}
-\begin{figure}
-	\begin{center} \includegraphics[scale=0.6]{images/MNIST_Sample_Images.png}\end{center}
-	\caption{MNIST}\label{MNISTFig}
-\end{figure}
 The first dataset is the MNIST dataset and is perhaps the urdataset for image classification benchmarks. It consists of 50k training and 10k test 28x28x1 images of handwritten digits (see \Cref{MNISTFig}). As a standard dataset it will be easy to compare our peformance to other published models. There are many approaches that can drop the error rate below 5 percent and most modern approaches should drop the error rate below 2 percent.  As shown below our models will obtain an error rate of approximately 0.5\%.
+\begin{figure}[H]
+	\begin{center} \includegraphics[scale=0.5]{images/MNIST_Sample_Images.png}\end{center}
+	\caption{MNIST Sample Images}\label{MNISTFig}
+\end{figure}
 
 \subsubsection{notMNIST Dataset}
-\begin{figure}
-	\begin{center} \includegraphics[scale=0.6]{images/notMNIST_Sample_Images.png}\end{center}
-	\caption{notMNIST}\label{notMNISTFig}
-\end{figure}
 The notMNIST dataset consists of approximately 500k training and 19k test $(28,28,1)$ images of the characters `a' through `j' (see \Cref{notMNISTFig}). These characters are typeset with a wide variety of fonts. The training set has a roughly 6.5 percent misclassification rate, while the test set has a roughly 0.5 percent misclassification rate. Training against this dataset serves three functions: there are some additional challenges (memory constraints) involved in training a dataset of this size on a GPU, it appears to be a harder task than the MNIST classification problem, and it would be nice to see if our methods have a positive side effect on classifying problems with noisy and incorrect data. As such, we have made no attempt to clean up the data. Even without cleaning the data, we are still able to obtain error rates around 1.5\%, which, since it appears that researchers have not seriously attempted to benchmark this dataset, might be state of the art.
 
-\subsubsection{CIFAR10}
-\begin{figure}
-	\begin{center} \includegraphics[scale=0.6]{images/CIFAR10_Sample_Images.png}\end{center}
-	\caption{CIFAR10}\label{CIFAR10Fig}
+\begin{figure}[H]
+	\begin{center} \includegraphics[scale=0.5]{images/notMNIST_Sample_Images.png}\end{center}
+	\caption{notMNIST Sample Images}\label{notMNISTFig}
 \end{figure}
+
+\subsubsection{CIFAR10}
 The CIFAR10 dataset consists of 50k training and 10k test $(32, 32,3)$ images pulled from 10 categories (e.g., cat, dog, etc.) (see \Cref{CIFAR10Fig}). This dataset is the most challenging of the three and is still used to benchmark state of the art models. Our best results yield error rates of around 20\%, which was state of the art in 2011, but far worse than what I expected to obtain with these models (see \Cref{rem:CIFAR10}).
+
+\begin{figure}[H]
+	\begin{center} \includegraphics[scale=0.5]{images/CIFAR10_Sample_Images.png}\end{center}
+	\caption{CIFAR10 Sample Images}\label{CIFAR10Fig}
+\end{figure}
 
 One reason for choosing image classification benchmarks is that it has been shown that deep networks are especially suitable for such problems, yet it is desirable to obtain faster models at the inference stage.
 

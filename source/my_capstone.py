@@ -34,7 +34,6 @@ def train_model(data, labels, params):
 def get_num_model_params(data, labels, params):
     """
     Prints the number of trainable parameters in a model.
-
     Args:
         data (np array) : dataset to construct a model with
         labels (np array) : labels to construct a model with
@@ -62,7 +61,7 @@ def get_num_model_params(data, labels, params):
         print("Total params: {}".format(total_parameters))
 
 def train_single_models(total_images, total_labels, image_shape, test_length, aug_params, data_dir, base_name):
-    """Trains a collection of individual models according to hardcoded parameters
+    """Trains a collection of individual models according to hardcoded parameters.
 
     Args:
         total_images (numpy array): all images including the test set
@@ -114,11 +113,11 @@ def train_single_models(total_images, total_labels, image_shape, test_length, au
     params['num_times'] = 2 
     params['filename'] =  base_name + '_single_' + 'medium_'
     #Run medium model
-    train_model(total_images, total_labels, params) 
+    #train_model(total_images, total_labels, params) 
 
     #New deep model params
     params['num_times'] = 3 
-    params['filename'] =  base_name + '_single_' + '3_layers_'
+    params['filename'] =  base_name + '_single_' + '3_times_'
     train_model(total_images, total_labels, params)
 
 def train_ensemble_models(total_images, total_labels, image_shape, test_length, aug_params, data_dir, base_name):
@@ -308,7 +307,7 @@ def train_models(total_images, total_labels, image_shape, test_length, aug_param
     train_single_models(total_images, total_labels, image_shape, test_length, aug_params, data_dir, base_name)
 
 def train_mnist(data_dir): 
-    """Train on the MNIST dataset
+    """Train on the MNIST dataset and generate sample image file.
 
     Args:
         data_dir(str) : directory to store the log data.
@@ -328,12 +327,13 @@ def train_mnist(data_dir):
         'rescale' : None}
 
     total_images, total_labels, image_shape, test_length = get_mnist() 
-    show_data(total_images, total_labels, shape = image_shape, title = "MNIST_Sample_Images", 
-                  aug_params = None, output_dir = os.path.join('latex', 'images'))
-    train_models(total_images, total_labels, image_shape, test_length, aug_params, data_dir, 'MNIST')
+    label_names = { 0 : '0', 1 : '1', 2 : '2', 3 : '3', 4 : '4', 5 : '5', 6 : '6', 7 : '7', 8 : '8', 9 : '9'}
+    show_data(total_images, total_labels, label_names, shape = image_shape, title = "MNIST_Sample_Images", 
+                  aug_params = None, output_dir = os.path.join('..', 'latex', 'images'))
+    #train_models(total_images, total_labels, image_shape, test_length, aug_params, data_dir, 'MNIST')
 
 def train_notmnist(data_dir): 
-    """Train on the notMNIST dataset
+    """Train on the notMNIST dataset and generate sample image file.
 
     Args:
         data_dir(str) : directory to store the log data.
@@ -353,9 +353,10 @@ def train_notmnist(data_dir):
         'rescale' : None}
 
     total_images, total_labels, image_shape, test_length = get_notmnist() 
-    show_data(total_images, total_labels, shape = image_shape, title = "notMNIST_Sample_Images", 
-              aug_params = None, output_dir = os.path.join('latex', 'images'))
-    train_models(total_images, total_labels, image_shape, test_length, aug_params, data_dir, 'notMNIST')
+    label_names = { 0 : 'A', 1 : 'B', 2 : 'C', 3 : 'D', 4 : 'E', 5 : 'F', 6 : 'G', 7 : 'H', 8 : 'I', 9 : 'J'}
+    show_data(total_images, total_labels, label_names, shape = image_shape, title = "notMNIST_Sample_Images", 
+              aug_params = None, output_dir = os.path.join('..', 'latex', 'images'))
+    #train_models(total_images, total_labels, image_shape, test_length, aug_params, data_dir, 'notMNIST')
 
 def train_cifar10(data_dir): 
     """Train on the cifar10 dataset
@@ -377,10 +378,11 @@ def train_cifar10(data_dir):
         'vertical_flip' : False, 
         'rescale' : None}
 
+    label_names = { 0 : 'Airplane', 1 : 'Automobile', 2 : 'Bird', 3 : 'Cat', 4 : 'Deer', 5 : 'Dog', 6 : 'Frog', 7 : 'Horse', 8 : 'Ship', 9 : 'Truck'}
     total_images, total_labels, image_shape, test_length = get_cifar() 
-    show_data(total_images, total_labels, shape = image_shape, title = "CIFAR10_Sample_Images",
-                      aug_params = None, output_dir = os.path.join('latex', 'images'))
-    train_models(total_images, total_labels, image_shape, test_length, aug_params, data_dir, 'CIFAR10')
+    show_data(total_images, total_labels, label_names, shape = image_shape, title = "CIFAR10_Sample_Images",
+                      aug_params = None, output_dir = os.path.join('..', 'latex', 'images'))
+    #train_models(total_images, total_labels, image_shape, test_length, aug_params, data_dir, 'CIFAR10')
 
 #Train our models
 train_mnist('collab_logs')

@@ -287,13 +287,14 @@ def randomize(dataset, labels):
     shuffled_labels = labels[permutation] 
     return shuffled_dataset, shuffled_labels
 
-def show_data(images, labels, title = "Sample images", estimates = None, num_images = 5, shape = (28,28), 
-              aug_params = None, output_dir = 'latex/images'p):
+def show_data(images, labels, label_names, title = "Sample Images", estimates = None, num_images = 5, shape = (28,28), 
+              aug_params = None, output_dir = 'latex/images'):
     """Displays plots of images with their labels.
 
     Args:
         images (nparray) : array of images
-        labels (nparray) : array of labels (not one hot encoded).
+        labels (nparray) : array of labels.
+        label_names (dict) : a dictionary between the labels and the corresponding names to be printed
         title (str): title for figure
         estimages (list): list of predictions
         num_images (int): number of images to show 
@@ -310,13 +311,12 @@ def show_data(images, labels, title = "Sample images", estimates = None, num_ima
         num_rows = 1 
         fig = plt.figure(figsize = (2*num_images, 2.5))
 
-    fig.suptitle(title)
     #for each image in our row
     for i in range(num_images):
         ix = np.random.randint(0, len(images))
         re = images[ix]
         ax = fig.add_subplot(num_rows, num_images, i+1) 
-        ax.set_xlabel("Image = " + str(ix) + "\nLabel = " + str(labels[ix]))
+        ax.set_xlabel("Image = " + str(ix) + "\nLabel = " + label_names[int(labels[ix])])
         ax.imshow(re)
         ax.set_xticks([])
         ax.set_yticks([])
