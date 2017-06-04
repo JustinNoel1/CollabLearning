@@ -233,7 +233,7 @@ Recent advances in image classification have focused on constructing very deep a
 
 Shallow and thin networks are much faster to train and to perform inference with, but typically learn models which generalize relatively poorly to testing data. Research has shown that for shallow and wide networks, this is not so much an artifact of the shallow model's inability to express the deeper model's predictions \cite{Distillation,Shallow,Compression}, but rather, at least in part, the shallow model's tendency to overfit to the training data when given hard prediction targets. 
 
-On the other side, it has been shown that training medium depth networks can be made easier by providing easier to match targets \cite{Curriculum, FitNet}.
+On the other side, it has been shown that training medium depth networks can be made easier by providing easier to match targets \cite{Curriculum, FitNet}. 
 
 % In this project we will consider a collaborative form of training deep networks for image classification problems on publicly available datasets.
 
@@ -249,7 +249,35 @@ A traditional ensemble typically outperforms each of its constituent models. Bel
 
 Below we will measure the generalization error in the usual fashion, via a test dataset and compare it to the outputs of models trained in the conventional, non-collaborative fashion. After examining the performance of a wide variety of collaboration methods. We will evaluate the training behavior by graphing the training and test errors of the best performing model.
 
-More specifically, we will train two variations on the ResNet architecture \cite{ResNet}. Although we will leave the specifics of the implementation details to \cite{ResNet}, we will mention a few key properties. The general ResNet architecture can be easily scaled to varying depths by adjusting two parameters, the number of `bricks' $B$ and the number of repetitions $R$. With the exception of the last brick, each brick ends in a halving of each spatial dimension and a doubling of the number of filters. We adjust the width of the network by setting the number of filters $F$ for the first convolutional layer. All models are `fully convolutional' in the sense that they do not have any hidden fully connected layers. The resulting model will have $1+(B-1)(2R+2)+2R+1$ convolutional layers and end with a global average pooling operation and a linear map $\mathbb{R}^{2^B F} \to \mathbb{R}^{10}$ which is then composed with a softmax transformation. 
+More specifically, we will train two variations on the ResNet architecture \cite{ResNet}. Here is the general layout of our implementation:
+\begin{enumerate}
+	\item Apply a batch normalization layer (BN) which learns to rescale the input.
+	\item Apply a 3x3 convolutional layer with $F$ filters, stride 1, and same padding.
+	\item A composite of $B$ Bricks which each consist of:
+	\begin{enumerate}
+		\item Applying $R$ stacked instances of the following composite (where the input to a layer is $x$):
+		\begin{enumerate}
+			\item $o=\mathrm{BN}(x)$
+			\item $o=\mathrm{Relu}(o):=\max(x,0)$.
+			\item Apply a 3x3 convolutional layer with same padding and the same number of filters and stride 1 to $o$. Set the output to $o$.
+			\item Apply the previous three steps again to the $o$ and set the output to $o$.
+			\item Return $x+o$.
+		\end{enumerate}
+		\item For each of the first $B-1$ bricks, apply a dimension reduction and filter doubling layer which each consists of:
+		\begin{enumerate}
+			\item $o=\mathrm{BN}(x)$
+			\item $o=\mathrm{Relu}(o):=\max(x,0)$.
+			\item Apply a 2x2 convolutional layer with valid padding, double the number of filters of the input to the dimension reduction layer, and stride 2 to $o$. Set the output to $o$.\label{en:red}
+			\item Apply the previous three steps again to the $o$ and set the output to $o$.
+			\item Return the sum of $o$ and an application of \ref{en:red} to $x$.
+		\end{enumerate}
+		\item Apply a global average pooling layer.
+		\item Apply a fully connected layer with output in the unscaled logit space $\mathbb{R}^{10}$.
+		\item Apply a softmax function to obtain the predictions.
+	\end{enumerate}
+\end{enumerate}
+
+As one can see, the general ResNet architecture can be easily scaled to varying depths by adjusting two parameters, the number of `bricks' $B$ and the number of repetitions $R$. With the exception of the last brick, each brick ends in a halving of each spatial dimension and a doubling of the number of filters. We adjust the width of the network by setting the number of filters $F$ for the first convolutional layer. All models are `fully convolutional' in the sense that they do not have any hidden fully connected layers. The resulting model will have $1+(B-1)(2R+2)+2R+1$ convolutional layers and end with a global average pooling operation and a linear map $\mathbb{R}^{2^B F} \to \mathbb{R}^{10}$ which is then composed with a softmax transformation. 
 
 The first model will be a `shallow and thin' model (ST) with $B=3, R=1$ and $F=8$, yielding a 10 layer model whose penultimate layer has dimension $2^{6}=64$.  This model has approximately 50k learnable parameters. The second model will be a `medium' (M) model with $B=3, R=2$, and $F=16$, yielding a 16 layer model whose penultimate layer has dimension $2^{7}=128$. This model has approximately 280k learnable parameters.  
 
@@ -558,7 +586,9 @@ It appears that the collaborative learning has a noticeable regularization effec
 
 
 \subsection{Justification}
-We can see that for any of the above collaborative methods and most choices of weights our collaborative models modestly outperform traditionally trained ensembles. Since the only difference between the collaborative approach and the traditional approach is the choice of cost function, this performance enhancement comes at virtually no cost. The only restriction here, and it is an important one, is that it is necessary to optimize both all of the models in the collaborative ensemble simultaneously, which means all of the models need to fit into memory and this can be a significant constraint if we are trying to get multiple large networks to collaborate. On the other hand, it appears that collaboratively training a model with a much weaker model only \emph{improves} both models. So adding smaller models into a collaboration should only require a comparatively small increase in memory, but noticeable improvements in performance. % In this section, your model’s final solution and its results should be compared to the benchmark you established earlier in the project using some type of statistical analysis. You should also justify whether these results and the solution are significant enough to have solved the problem posed in the project. Questions to ask yourself when writing this section:
+We can see that for any of the above collaborative methods and most choices of weights our collaborative models modestly outperform traditionally trained ensembles. Since the only difference between the collaborative approach and the traditional approach is the choice of cost function, this performance enhancement comes at virtually no cost. The only restriction here, and it is an important one, is that it is necessary to optimize both all of the models in the collaborative ensemble simultaneously, which means all of the models need to fit into memory and this can be a significant constraint if we are trying to get multiple large networks to collaborate. On the other hand, it appears that collaboratively training a model with a much weaker model only \emph{improves} both models. So adding smaller models into a collaboration should only require a comparatively small increase in memory, but noticeable improvements in performance. 
+
+% In this section, your model’s final solution and its results should be compared to the benchmark you established earlier in the project using some type of statistical analysis. You should also justify whether these results and the solution are significant enough to have solved the problem posed in the project. Questions to ask yourself when writing this section:
 
 % Are the final results found stronger than the benchmark result reported earlier?
 % Have you thoroughly analyzed and discussed the final solution?

@@ -22,7 +22,7 @@ def resnet_layer(x, act, training, scope):
 		o = tf.layers.conv2d(o, filters, 3, kernel_initializer = inits, use_bias = False, padding = "SAME", activation = None) 
 		o = tf.layers.batch_normalization(o, training=training, center = True, scale = False, trainable = True) 
 		o = act(o) 
-		o = tf.layers.conv2d(o, filters, 3, kernel_initializer = inits, bias_initializer = cinits, use_bias = True, activation = None, padding = "SAME") 
+		o = tf.layers.conv2d(o, filters, 3, kernel_initializer = inits, bias_initializer = cinits, use_bias = False, activation = None, padding = "SAME") 
 		return x+o
 
 def resnet_smaller_layer(x, act, training, scope):
@@ -46,13 +46,13 @@ def resnet_smaller_layer(x, act, training, scope):
 		o = tf.layers.batch_normalization(x, training=training, center = True, scale = False, trainable = True, name = scope + "BN") 
 		o = act(o) 
 		# Any bias is wiped out by the normalization 
-		o = tf.layers.conv2d(x, filters*2, 3, strides = (2,2), use_bias = False, activation = None, kernel_initializer = inits, padding = "same") 
+		o = tf.layers.conv2d(o, filters*2, 3, strides = (2,2), use_bias = False, activation = None, kernel_initializer = inits, padding = "same") 
 		o = tf.layers.batch_normalization(o, training=training, center = True, scale = False, trainable = True, name = scope +"BN2") 
 		o = act(o) 
 		o = tf.layers.conv2d(o, filters*2, 3, use_bias = False, kernel_initializer = inits, padding = "same") 
 
 		#shortcut
-		shortcut = tf.layers.conv2d(x, filters*2, 2, strides = (2,2), use_bias = True, kernel_initializer = inits, bias_initializer = cinits, padding = "VALID") 
+		shortcut = tf.layers.conv2d(x, filters*2, 2, strides = (2,2), use_bias = False, kernel_initializer = inits, bias_initializer = cinits, padding = "VALID") 
 		return o+shortcut
 
 def resnet(o, act, training, times = 1, scope = 'Bricks', drop = True): 
