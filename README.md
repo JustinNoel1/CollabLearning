@@ -1,3 +1,6 @@
+## Warning:
+There was a significant bug in the version of this program that was used for generating the report. I have corrected the bug in the code, but I have not yet updated the report. So expect that the corrected version of the program to perform drastically better than those appearing in the report. For example, the very small models ("shallow and thin") should obtain error rates around 10 percent on the CIFAR10 dataset. 
+
 # CollabLearning
 In this project, we introduce several techniques for training collaborative ensembles of deep neural networks. In addition to learning to solve an image classification problem, these collaborative ensembles also learn to reach a consensus on their predictions. As a consequence, each of the models in these ensembles learns to mimic a traditional ensemble, with corresponding improvements to performance.
 

@@ -16,13 +16,13 @@ def resnet_layer(x, act, training, scope):
 
 		# The order of operations is extremely important here. We need to pass the original input summed with our transformed input 
 		# Center add learnable bias term. Scaling is unnecessary as we further compose with a linear function 
-		o = tf.layers.batch_normalization(x, training=training, center = True, scale = False, trainable = True)#, name = "GlobalNormalize") 
-		o = act(o) 
+		o = tf.layers.batch_normalization(x, training=training, center = False, scale = False, trainable = True)#, name = "GlobalNormalize") 
+		# o = act(o) 
 		# Any bias is wiped out by normalization 
-		o = tf.layers.conv2d(o, filters, 3, kernel_initializer = inits, use_bias = False, padding = "SAME", activation = None) 
-		o = tf.layers.batch_normalization(o, training=training, center = True, scale = False, trainable = True) 
-		o = act(o) 
-		o = tf.layers.conv2d(o, filters, 3, kernel_initializer = inits, bias_initializer = cinits, use_bias = False, activation = None, padding = "SAME") 
+		o = tf.layers.conv2d(o, filters, 3, kernel_initializer = inits, use_bias = True, padding = "SAME", activation = act) 
+		o = tf.layers.batch_normalization(o, training=training, center = False, scale = False, trainable = True) 
+		# o = act(o) 
+		o = tf.layers.conv2d(o, filters, 3, kernel_initializer = inits, bias_initializer = cinits, use_bias = True, activation = act, padding = "SAME") 
 		return x+o
 
 def resnet_smaller_layer(x, act, training, scope):
@@ -43,16 +43,14 @@ def resnet_smaller_layer(x, act, training, scope):
 		inits= tf.contrib.layers.variance_scaling_initializer() 
 		cinits = tf.constant_initializer() 
 
-		o = tf.layers.batch_normalization(x, training=training, center = True, scale = False, trainable = True, name = scope + "BN") 
-		o = act(o) 
-		# Any bias is wiped out by the normalization 
-		o = tf.layers.conv2d(o, filters*2, 3, strides = (2,2), use_bias = False, activation = None, kernel_initializer = inits, padding = "same") 
-		o = tf.layers.batch_normalization(o, training=training, center = True, scale = False, trainable = True, name = scope +"BN2") 
-		o = act(o) 
-		o = tf.layers.conv2d(o, filters*2, 3, use_bias = False, kernel_initializer = inits, padding = "same") 
+		o = tf.layers.batch_normalization(x, training=training, center = False, scale = False, trainable = True, name = scope + "BN") 
+		o = tf.layers.conv2d(o, filters*2, 3, strides = (2,2), use_bias = True, activation = act, kernel_initializer = inits, padding = "same") 
+		o = tf.layers.batch_normalization(o, training=training, center = False, scale = False, trainable = True, name = scope +"BN2") 
+		o = tf.layers.conv2d(o, filters*2, 3, use_bias = True, kernel_initializer = inits, activation = act, padding = "same") 
 
 		#shortcut
-		shortcut = tf.layers.conv2d(x, filters*2, 2, strides = (2,2), use_bias = False, kernel_initializer = inits, bias_initializer = cinits, padding = "VALID") 
+		shortcut = tf.layers.conv2d(x, filters*2, 2, strides = (2,2), use_bias = True, 
+			activation = act, kernel_initializer = inits, bias_initializer = cinits, padding = "VALID") 
 		return o+shortcut
 
 def resnet(o, act, training, times = 1, scope = 'Bricks', drop = True): 
@@ -89,10 +87,10 @@ def deep_model(x, training, params = { 'act': tf.nn.relu, 'start_filter' : 16, '
 		cinits = tf.constant_initializer() 
 
 		#This just normalizes our input. 
-		o = tf.layers.batch_normalization(x, training=training, center = False, scale = False, trainable = False)#, name="Normalize") 
+		o = tf.layers.batch_normalization(x, training=training, center = False, scale = False, trainable = True)#, name="Normalize") 
 		#Put input into the starting number of filters e.g. 32x32x3 32x32x16 
 		o = tf.layers.conv2d(o, params['start_filter'], 3, padding = "same", use_bias = True, 
-			kernel_initializer = inits, bias_initializer = cinits, activation = None) 
+			kernel_initializer = inits, bias_initializer = cinits, activation = act) 
 
 		#Repeat Resnet bricks 
 		o = tf.contrib.layers.repeat(o, params['num_bricks']-1, resnet, act, training, times = params['num_times'], drop = True, scope=scope) 

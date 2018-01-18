@@ -81,8 +81,8 @@ def train_single_models(total_images, total_labels, image_shape, test_length, au
         'batch_size' : 64, 
         'epochs' : 11, 
         'image_shape' : image_shape, 
-        'learning_rate' : 0.5**10, 
-        'data_augmentation' : None, 
+        'learning_rate' : 0.5**7,
+        'data_augmentation' : None,
         'truncate_data' : True, 
         'valid_num' : test_length, 
         'shuffle' : True, 
@@ -105,7 +105,7 @@ def train_single_models(total_images, total_labels, image_shape, test_length, au
     params['num_times'] = 1 
     params['filename'] =  base_name + '_single_' + 'shallow_and_thin'
     #Run shallow and thin single model 
-    #train_model(total_images, total_labels, params) 
+    train_model(total_images, total_labels, params) 
 
     #New medium model params 
     params['start_filter'] = 16 
@@ -113,7 +113,7 @@ def train_single_models(total_images, total_labels, image_shape, test_length, au
     params['num_times'] = 2 
     params['filename'] =  base_name + '_single_' + 'medium_'
     #Run medium model
-    #train_model(total_images, total_labels, params) 
+    train_model(total_images, total_labels, params) 
 
     #New deep model params
     params['num_times'] = 5 
@@ -142,11 +142,11 @@ def train_collab_models(total_images, total_labels, image_shape, test_length, au
         'batch_size' : 64, 
         'epochs' : 11, 
         'image_shape' : image_shape, 
-        'learning_rate' : 0.5**10, 
+        'learning_rate' : 0.5**7,
         'data_augmentation' : None, 
         'truncate_data' : True, 
         'valid_num' : test_length, 
-        'shuffle' : False, 
+        'shuffle' : True,
         'filename' : base_name + '_collab_' + 'test', 
         'regularization_rate' : 0.1**4,
         'model_type' : 'collab'}
@@ -171,9 +171,10 @@ def train_collab_models(total_images, total_labels, image_shape, test_length, au
     medium_params['num_times'] = 2 
 
     #Add prefix to prevent overwriting log files 
-    params['collab_method'] = 'None'
-    params['collab_weight'] = 0.1**0
-    params['filename'] = base_name + '_collab_' + 'truncated_test_ensemble_0.1x0'
+    # params['collab_method'] = 'None'
+    # params['collab_weight'] = 0.1**0
+    # params['filename'] = base_name + '_collab_' + 'truncated_test_ensemble_0.1x0'
+
     #Mixed collab
     params['list_of_params'] = [st_params, medium_params]
     if base_name != 'notMNIST':
@@ -191,38 +192,22 @@ def train_collab_models(total_images, total_labels, image_shape, test_length, au
     #ACTUAL RUN
     #First real run
     params['truncate_data'] = False 
+
     #Run ensemble
     params['collab_method'] = 'None'
     params['filename'] = base_name + '_collab_' + 'shallow_and_thin_and_medium_ensemble'
     train_model(total_images, total_labels, params)   
 
     #Run collab models
-    params['collab_weight'] = 0.1**0
-    params['collab_method'] = 'cross_ent'
-    params['filename'] = base_name + '_collab_' + 'shallow_and_thin_and_medium_CE_0.1x0'
-    train_model(total_images, total_labels, params)   
-
-    params['filename'] = base_name + '_collab_' + 'shallow_and_thin_and_medium_L2_0.1x0'
-    params['collab_method'] = 'L2'
-    train_model(total_images, total_labels, params)   
-
-    params['filename'] = base_name + '_collab_' + 'shallow_and_thin_and_medium_L1_0.1x0'
-    params['collab_method'] = 'L1'
-    train_model(total_images, total_labels, params)   
-
-    #Run all of the models again with another collaboration weight
-    params['collab_weight'] = 0.1**1
-    params['collab_method'] = 'cross_ent'
-    params['filename'] = base_name + '_collab_' + 'shallow_and_thin_and_medium_CE_0.1x1'
-    train_model(total_images, total_labels, params)   
-
-    params['filename'] = base_name + '_collab_' + 'shallow_and_thin_and_medium_L2_0.1x1'
-    params['collab_method'] = 'L2'
-    train_model(total_images, total_labels, params)   
-
-    params['filename'] = base_name + '_collab_' + 'shallow_and_thin_and_medium_L1_0.1x1'
-    params['collab_method'] = 'L1'
-    train_model(total_images, total_labels, params)      
+    for collab_exp in (0,1,2,4):
+        for collab_method in ("cross_ent", "L1", "L2"): 
+            params['collab_weight'] = 0.1**collab_exp 
+            params['collab_method'] = collab_method
+            # rename for compatibility with filename parser
+            if collab_method == 'cross_ent':
+                collab_method = 'CE'
+            params['filename'] = base_name + '_collab_' + 'shallow_and_thin_and_medium_' + collab_method + '_0.1x' + str(collab_exp)
+            train_model(total_images, total_labels, params)
 
 def train_models(total_images, total_labels, image_shape, test_length, aug_params, data_dir, base_name):
     """This trains the single, ensemble, and collaborative models according to the passed values."""
@@ -308,6 +293,6 @@ def train_cifar10(data_dir):
     train_models(total_images, total_labels, image_shape, test_length, aug_params, data_dir, 'CIFAR10')
 
 #Train our models
-train_mnist('collab_logs')
 train_cifar10('collab_logs')
 train_notmnist('collab_logs')
+train_mnist('collab_logs')
