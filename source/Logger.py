@@ -59,9 +59,7 @@ class Logger(object):
     def batch_update(self, train_error, train_cost):
         """Updates logs after running a batch"""
 
-        #calculate average over batch
         self.batch_train_error = train_error
-        print("Train Error = {:6f}".format(self.batch_train_error*100), end = "\r")
         self.batch_train_cost = train_cost
 
     def epoch_update(self, test_error, test_cost, sess): 

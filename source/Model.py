@@ -2,6 +2,7 @@ from resnet import *
 from batch_manager import *
 from Logger import *
 import tensorflow as tf 
+from math import ceil
 
 #Generic model holds features common to all models
 class Model(object): 
@@ -111,22 +112,22 @@ class SingleModel(Model):
 		self.regularization_rate = params['regularization_rate'] 
 
 		cur_scope = params['filename']
-		with tf.name_scope(cur_scope): 
+		with tf.variable_scope(cur_scope): 
 			self.learning_rate = tf.placeholder(tf.float32, shape = []) 
 			#logits of our model 
-			self.logits = deep_model(self.x, self.training, params = params, scope = cur_scope) 
+			self.regularizer = tf.contrib.layers.l2_regularizer(scale = self.regularization_rate, scope = cur_scope )
+			self.logits = deep_model(self.x, self.training, params = params, scope = cur_scope, regularizer = self.regularizer) 
 
 			#Cost function is cross entropy plus L2 weight decay 
 			self.cross_ent = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(labels = self.y, logits = self.logits), name = "cross_ent") 
 
-			if self.regularization_rate == 0.:
-				self.cost = self.cross_ent
-			else:
-				#Don't apply weight decay to bias variables (beta is the name in batch_normalization layers)
-				self.regularizer = tf.contrib.layers.l2_regularizer(scale = self.regularization_rate )
-				self.lossL2 =tf.reduce_sum( [self.regularizer(v) for v in tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES, scope = cur_scope) 
-					if ('bias' not in v.name) and ('beta' not in v.name)])
-				self.cost = self.cross_ent + self.lossL2
+			# if self.regularization_rate == 0.:
+			# 	self.cost = self.cross_ent
+			# else:
+			# 	#Don't apply weight decay to bias variables (beta is the name in batch_normalization layers)
+			# 	# self.lossL2 =tf.reduce_sum( [self.regularizer(v) for v in tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES, scope = cur_scope) 
+			# 		# if ('bias' not in v.name) and ('beta' not in v.name)])
+			self.cost = self.cross_ent + tf.add_n(tf.get_collection(tf.GraphKeys.REGULARIZATION_LOSSES, scope=cur_scope))
 
 			#predictions 
 			self.preds = tf.argmax(self.logits, 1, name = 'preds') 
@@ -168,14 +169,19 @@ class SingleModel(Model):
 
 		cost = 0.
 		error = 0.
+		mc = 0.
+		me = 0.
+		batch = 0
+		num_times = ceil(self.train_size/self.batch_size)
 		#Go through the validation set in batches (to avoid memory overruns). 
 		#Sum up the unaveraged error statistics
 		for feed_dict[self.x], feed_dict[self.y] in self.batch.train_batches(self.batch_size, shuffle = self.shuffle,
 			distort = self.distort):
+			batch += 1
 			_, c, e = sess.run([self.optimizer, self.cost, self.error], feed_dict = feed_dict)
-			# From previous version used in original analysis
-			# cost += 0.95*cost + 0.05*c
-			# error = 0.95*error + 0.05*e
+			mc  = 0.7*mc + 0.3*c
+			me  = 0.7*me + 0.3*e
+			print("Batch: {}/{}, Batch cost: {:6f}, Batch error: {:6f}".format(batch, num_times, mc,me),end="\r")
 			cost += c*len(feed_dict[self.y])
 			error += e*len(feed_dict[self.y])
 
@@ -268,21 +274,23 @@ class EnsembleModel(Model):
 			self.regularization_rate[i] = self.list_of_params[i]['regularization_rate']
 
 			cur_scope = self.base_name + "_{0:03d}".format(i)
-			with tf.name_scope( cur_scope ): 
+			with tf.variable_scope( cur_scope ): 
+				self.regularizer[i] = tf.contrib.layers.l2_regularizer(scale = self.regularization_rate[i], scope = cur_scope) 
 				#logits of our model 
-				self.logits[i] = deep_model(self.x, self.training, params = self.list_of_params[i], scope = cur_scope ) 
+				self.logits[i] = deep_model(self.x, self.training, params = self.list_of_params[i], scope = cur_scope, regularizer = self.regularizer[i]) 
 
 				#Cost function is cross entropy plus L2 weight decay 
 				self.cross_ent[i] = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(labels=self.y, 
 					logits = self.logits[i]), name = "cross_ent")
 
 				#Don't apply weight decay to bias variables (beta is the name in batch_normalization layers)
-				if self.regularization_rate[i]==0.:
-					self.cost[i] = self.cross_ent[i]
-				else:
-					self.regularizer[i] = tf.contrib.layers.l2_regularizer(scale = self.regularization_rate[i]) 
-					self.lossL2[i] = tf.reduce_sum( [self.regularizer[i](v) for v in tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES, scope = cur_scope) if ('bias' not in v.name) and ('beta' not in v.name)]) 
-					self.cost[i] = self.cross_ent[i] + self.lossL2[i]
+				# if self.regularization_rate[i]==0.:
+				# 	self.cost[i] = self.cross_ent[i]
+				# else:
+				# 	self.regularizer[i] = tf.contrib.layers.l2_regularizer(scale = self.regularization_rate[i]) 
+				# 	self.lossL2[i] = tf.reduce_sum( [self.regularizer[i](v) for v in tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES, scope = cur_scope) 
+				# 		if ('bias' not in v.name) and ('beta' not in v.name)]) 
+				self.cost[i] = self.cross_ent[i] + tf.add_n(tf.get_collection(tf.GraphKeys.REGULARIZATION_LOSSES, scope = cur_scope))
 
 				#predictions 
 				self.scores[i] = tf.nn.softmax(self.logits[i], name = 'scores') 
@@ -299,9 +307,9 @@ class EnsembleModel(Model):
 				self.extra_ops += self.extra_update_ops[i]
 
 				#Optimization step 
-				with tf.control_dependencies(self.extra_update_ops[i]): 
-					self.aos[i] = tf.train.AdamOptimizer(self.learning_rate) 
-					self.optimizers[i] = self.aos[i].minimize(self.cost[i])
+				# with tf.control_dependencies(self.extra_update_ops[i]): 
+				# 	self.aos[i] = tf.train.AdamOptimizer(self.learning_rate) 
+				# 	self.optimizers[i] = self.aos[i].minimize(self.cost[i])
 
 				#Logger must be created after we have built the graph	
 				params['filename']=cur_scope
@@ -310,8 +318,8 @@ class EnsembleModel(Model):
 		params['filename'] = self.base_name + "_Ensemble"
 		self.ens_logger = Logger(params, ceil(self.batch.train_length/self.batch_size)) 
 		params['filename'] = self.base_name
-		self.total_cost = tf.reduce_sum(self.cost, axis = 0)
-		self.ens_logits = tf.reduce_mean(self.logits, axis = 0)
+		self.total_cost = tf.add_n(self.cost)
+		self.ens_logits = tf.add_n(self.logits)/self.ensemble_size
 		self.ens_cross_ent = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(labels=self.y, logits = self.ens_logits))
 		self.ens_preds = tf.argmax(self.ens_logits, 1, name = 'ens_preds') 
 		self.ens_correct_pred = tf.equal(self.ens_preds, tf.argmax(self.y, 1), name = 'ens_correct_pred')
@@ -320,33 +328,31 @@ class EnsembleModel(Model):
 		self.ens_error = 1.0-self.ens_accuracy
 
 		if params['model_type'] == 'collab':
-			#get neighboring cross entropies
-			self.ces = [None]*(self.ensemble_size-1)
-			for i in range(self.ensemble_size-1):
-				self.ces[i] = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(labels= self.scores[i+1], logits = self.logits[i])) 	+ tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(labels = self.scores[i], logits = self.logits[i+1]))
-
-			self.total_cross_ent = tf.reduce_sum(self.ces)
-
-			#get neighboring sum of square differences in logits
-			self.sum_of_squares = [None]*(self.ensemble_size-1)
-			for i in range(self.ensemble_size-1):
-				self.sum_of_squares[i] = tf.reduce_sum((self.logits[i]-self.logits[i+1])**2, axis =1)
-
-			self.total_sum_of_squares = tf.reduce_mean(self.sum_of_squares)
-
-			#get neighboring sum of absolute differences in logits
-			self.sum_of_dists = [None]*(self.ensemble_size-1)
-			for i in range(self.ensemble_size-1):
-				self.sum_of_dists[i] = tf.reduce_sum(tf.abs(self.logits[i]-self.logits[i+1]), axis=1)
-
-			self.total_sum_of_dists = tf.reduce_mean(self.sum_of_dists)
-
 			self.collab_weight = params['collab_weight']
-			if params['collab_method'] == 'cross_ent':
+
+			if params['collab_method'] == 'cross_ent': 
+				#get neighboring cross entropies 
+				self.ces = [None]*(self.ensemble_size-1) 
+				for i in range(self.ensemble_size-1): 
+					self.ces[i] = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(labels= self.scores[i+1], logits = self.logits[i])) + \
+						tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(labels = self.scores[i], logits = self.logits[i+1]))
+				self.total_cross_ent = tf.reduce_sum(self.ces)
 				self.total_cost += self.total_cross_ent*self.collab_weight
+
 			elif params['collab_method'] ==  'L2':
-				self.total_cost += self.total_sum_of_squares*self.collab_weight
+				#get neighboring sum of square differences in logits 
+				self.sum_of_squares = [None]*(self.ensemble_size-1) 
+				for i in range(self.ensemble_size-1): 
+					self.sum_of_squares[i] = tf.reduce_sum((self.logits[i]-self.logits[i+1])**2, axis =1) 
+
+				self.total_sum_of_squares = tf.reduce_mean(self.sum_of_squares) 
+				self.total_cost += self.total_sum_of_squares*self.collab_weight 
 			elif params['collab_method'] == 'L1':
+				#get neighboring sum of absolute differences in logits 
+				self.sum_of_dists = [None]*(self.ensemble_size-1) 
+				for i in range(self.ensemble_size-1): 
+					self.sum_of_dists[i] = tf.reduce_sum(tf.abs(self.logits[i]-self.logits[i+1]), axis=1) 
+				self.total_sum_of_dists = tf.reduce_mean(self.sum_of_dists)
 				self.total_cost += self.total_sum_of_dists*self.collab_weight
 
 		#Optimization step 
@@ -372,6 +378,12 @@ class EnsembleModel(Model):
 		stats = np.zeros(self.ensemble_size*2+2)
 		ens_c = 0.
 		ens_e = 0.
+		#rolling averages
+		# mcost = np.zeros(self.ensemble_size)
+		# merror = np.zeros(self.ensemble_size)
+		# mstats = np.zeros(self.ensemble_size*2+2)
+		# mens_c = 0.
+		# mens_e = 0.
 		#Go through the validation set in batches (to avoid memory overruns). 
 		#Sum up the unaveraged error statistics
 		for feed_dict[self.x], feed_dict[self.y] in self.batch.train_batches(self.batch_size, 
@@ -379,11 +391,12 @@ class EnsembleModel(Model):
 			_,  *stats = sess.run([self.optimizer, *self.cost, *self.error, self.ens_cross_ent, self.ens_error], feed_dict = feed_dict)
 			stats = np.array(stats)
 			#previous way of measuring stats
-			# stats = 0.05*np.array(stats)
-			# cost = 0.95*cost + stats[0:self.ensemble_size]
-			# error = 0.95*error + stats[self.ensemble_size : 2*self.ensemble_size]
-			# ens_c = 0.95*ens_c + stats[2*self.ensemble_size]
-			# ens_e = 0.95*ens_e + stats[2*self.ensemble_size+1]
+			# mstats = 0.03*np.array(stats)
+			# mcost = 0.7*cost + mstats[0:self.ensemble_size]
+			# merror = 0.7*error + mstats[self.ensemble_size : 2*self.ensemble_size]
+			# mens_c = 0.7*ens_c + mstats[2*self.ensemble_size]
+			# mens_e = 0.7*ens_e + mstats[2*self.ensemble_size+1]
+			# print("Batch: {}/{}, Batch cost: {:6f}, Batch error: {:6f}".format(batch, num_times, ix, mcost[ix],merror[ix]),end="\r")
 			cost += len(feed_dict[self.y])*stats[0:self.ensemble_size]
 			error += len(feed_dict[self.y])*stats[self.ensemble_size : 2*self.ensemble_size]
 			ens_c += len(feed_dict[self.y])*stats[2*self.ensemble_size]
@@ -486,7 +499,7 @@ def load_model(data, labels, filename, params, num_samples = 16):
 		feed_dict[model.y] = tlabels 
 		feed_dict[model.training] = False 
 		preds = sess.run(model.preds, feed_dict = feed_dict) 
-		print("Predications:") 
+		print("Predictions:") 
 		print(preds) 
 		print("Labels:") 
 		print(labels) 

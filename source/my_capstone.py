@@ -78,10 +78,10 @@ def train_single_models(total_images, total_labels, image_shape, test_length, au
         'start_filter' : 2, 
         'num_bricks': 3, 
         'num_times' : 2, 
-        'batch_size' : 64, 
+        'batch_size' : 128,
         'epochs' : 11, 
         'image_shape' : image_shape, 
-        'learning_rate' : 0.5**9,
+        'learning_rate' : 0.5**8,
         'data_augmentation' : None,
         'truncate_data' : True, 
         'valid_num' : test_length, 
@@ -89,13 +89,14 @@ def train_single_models(total_images, total_labels, image_shape, test_length, au
         'filename' : base_name + '_single_' + 'test', 
         'regularization_rate' : 0.1**4,
         'model_type' : 'single'} 
+
     #Run test single model 
     #train_model(total_images, total_labels, params) 
 
     if base_name != 'notMNIST':
-        params['epochs'] = 30 
+        params['epochs'] = 80
     else:
-        params['epochs'] = 15 
+        params['epochs'] = 40
     params['truncate_data'] = False 
     params['data_augmentation'] = aug_params
 
@@ -116,8 +117,8 @@ def train_single_models(total_images, total_labels, image_shape, test_length, au
     train_model(total_images, total_labels, params) 
 
     #New deep model params
-    params['num_times'] = 5 
-    params['filename'] =  base_name + '_single_data_aug' + '5_times_'
+    params['num_times'] = 3 
+    params['filename'] =  base_name + '_single_'+ '3_times_'
     train_model(total_images, total_labels, params)
 
 def train_collab_models(total_images, total_labels, image_shape, test_length, aug_params, data_dir, base_name):
@@ -139,10 +140,10 @@ def train_collab_models(total_images, total_labels, image_shape, test_length, au
         'start_filter' : 4, 
         'num_bricks': 3, 
         'num_times' : 2, 
-        'batch_size' : 64, 
+        'batch_size' : 128,
         'epochs' : 11, 
         'image_shape' : image_shape, 
-        'learning_rate' : 0.5**9,
+        'learning_rate' : 0.5**8,
         'data_augmentation' : None, 
         'truncate_data' : True, 
         'valid_num' : test_length, 
@@ -158,8 +159,7 @@ def train_collab_models(total_images, total_labels, image_shape, test_length, au
     # params['list_of_params'] = [test_params]*3
     # train_model(total_images, total_labels, params) 
     
-    params['data_augmentation'] = None 
-    st_params = test_params.copy()
+    st_params = params.copy()
     st_params['start_filter'] = 8 
     st_params['num_bricks'] = 3 
     st_params['num_times'] = 1 
@@ -171,31 +171,33 @@ def train_collab_models(total_images, total_labels, image_shape, test_length, au
     medium_params['num_times'] = 2 
 
     #Add prefix to prevent overwriting log files 
-    # params['collab_method'] = 'None'
-    # params['collab_weight'] = 0.1**0
+
     # params['filename'] = base_name + '_collab_' + 'truncated_test_ensemble_0.1x0'
+    params['list_of_params'] = [st_params, medium_params]
 
     #Mixed collab
-    params['list_of_params'] = [st_params, medium_params]
     if base_name != 'notMNIST':
-        params['epochs'] = 30 
+        params['epochs'] = 80 
     else:
-        params['epochs'] = 15 
+        params['epochs'] = 40
 
     #Test run with truncated data
     #train_model(total_images, total_labels, params)   
-    params['collab_method'] = 'L2'
-    params['collab_weight'] = 0.1**2 
-    params['filename'] = base_name + '_collab_' + 'truncated_test_L2_0.1x2'
-    train_model(total_images, total_labels, params)   
+    # params['collab_method'] = 'L2'
+    # params['collab_weight'] = 0.1**2 
+    # params['filename'] = base_name + '_collab_' + 'truncated_test_L2_0.1x2'
+    # train_model(total_images, total_labels, params)   
 
     #ACTUAL RUN
     #First real run
     params['truncate_data'] = False 
+    params['data_augmentation'] = aug_params
 
     #Run ensemble
     params['collab_method'] = 'None'
+    params['collab_weight'] = 0
     params['filename'] = base_name + '_collab_' + 'shallow_and_thin_and_medium_ensemble'
+    print("Training Ensemble")
     train_model(total_images, total_labels, params)   
 
     #Run collab models
@@ -207,12 +209,13 @@ def train_collab_models(total_images, total_labels, image_shape, test_length, au
             if collab_method == 'cross_ent':
                 collab_method = 'CE'
             params['filename'] = base_name + '_collab_' + 'shallow_and_thin_and_medium_' + collab_method + '_0.1x' + str(collab_exp)
+            print("Training CollabEnsemble")
             train_model(total_images, total_labels, params)
 
 def train_models(total_images, total_labels, image_shape, test_length, aug_params, data_dir, base_name):
     """This trains the single, ensemble, and collaborative models according to the passed values."""
+    # train_single_models(total_images, total_labels, image_shape, test_length, aug_params, data_dir, base_name)
     train_collab_models(total_images, total_labels, image_shape, test_length, aug_params, data_dir, base_name)
-    train_single_models(total_images, total_labels, image_shape, test_length, aug_params, data_dir, base_name)
 
 def train_mnist(data_dir): 
     """Train on the MNIST dataset and generate sample image file.
@@ -238,7 +241,7 @@ def train_mnist(data_dir):
     label_names = { 0 : '0', 1 : '1', 2 : '2', 3 : '3', 4 : '4', 5 : '5', 6 : '6', 7 : '7', 8 : '8', 9 : '9'}
     show_data(total_images, total_labels, label_names, shape = image_shape, title = "MNIST_Sample_Images", 
                   aug_params = None, output_dir = os.path.join('..', 'latex', 'images'))
-    train_models(total_images, total_labels, image_shape, test_length, aug_params, data_dir, 'MNIST')
+    train_models(total_images, total_labels, image_shape, test_length, None, data_dir, 'MNIST')
 
 def train_notmnist(data_dir): 
     """Train on the notMNIST dataset and generate sample image file.
@@ -264,7 +267,7 @@ def train_notmnist(data_dir):
     label_names = { 0 : 'A', 1 : 'B', 2 : 'C', 3 : 'D', 4 : 'E', 5 : 'F', 6 : 'G', 7 : 'H', 8 : 'I', 9 : 'J'}
     show_data(total_images, total_labels, label_names, shape = image_shape, title = "notMNIST_Sample_Images", 
               aug_params = None, output_dir = os.path.join('..', 'latex', 'images'))
-    train_models(total_images, total_labels, image_shape, test_length, aug_params, data_dir, 'notMNIST')
+    train_models(total_images, total_labels, image_shape, test_length, None, data_dir, 'notMNIST')
 
 def train_cifar10(data_dir): 
     """Train on the cifar10 dataset
@@ -293,6 +296,6 @@ def train_cifar10(data_dir):
     train_models(total_images, total_labels, image_shape, test_length, aug_params, data_dir, 'CIFAR10')
 
 #Train our models
-train_cifar10('collab_logs')
 train_notmnist('collab_logs')
 train_mnist('collab_logs')
+train_cifar10('collab_logs')
